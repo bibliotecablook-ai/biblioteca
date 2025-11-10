@@ -1,0 +1,87 @@
+body {
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+
+
+  
+  .container-edicao {
+    max-width: 650px;
+    margin: 50px auto;
+    background: #d7e2e77e;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  
+  h1 {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 30px;
+    margin-bottom: 25px;
+    
+  }
+  
+  form label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  form input[type="text"],
+  form input[type="email"],
+  form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+  }
+  
+  form input:focus,
+  form select:focus {
+    border-color: #669999;
+    outline: none;
+  }
+  
+  .botoes-acao {
+    margin-top: 30px;
+    text-align: left;
+  }
+  
+  .botoes-acao button.salvar {
+    background: #76c2c2;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .botoes-acao button.salvar:hover {
+    background: #72b1b1;
+  }
+  
+  .botoes-acao a.link-cancelar {
+    display: inline-block;
+    margin-left: 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 10px;
+    transition: color 0.3s;
+  }
+  
+  .botoes-acao a.link-cancelar:hover {
+    color: #000;
+    text-decoration: underline;
+  }
+  

@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+
+/* === Estilo minimalista verde-água para tabelas === */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Open Sans", Arial, Helvetica, sans-serif;
+
+  font-size: 15px;
+  color: #043836;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Cabeçalho */
+table thead {
+  background-color: #496b6b;
+  color: #ffffff;
+}
+
+table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+}
+
+/* Linhas do corpo */
+table tbody tr {
+  border-bottom: 1px solid rgba(63, 191, 180, 0.2);
+  transition: background 0.2s ease;
+}
+
+/* Listras alternadas */
+table tbody tr:nth-child(even) {
+  background-color: rgba(63, 191, 180, 0.05);
+}
+
+/* Efeito hover */
+table tbody tr:hover {
+  background-color: rgba(63, 191, 180, 0.12);
+}
+
+/* Células */
+table td {
+  padding: 10px 16px;
+}
+
+/* Alinhamento do status */
+table td:last-child {
+  text-align: center;
+  font-weight: 600;
+  color: #669999;
+}
+
+/* Ajuste do cabeçalho escuro (se usar .table-dark) */
+.table-dark th {
+  background-color: #669999 !important;
+}
+
+/* Bordas visíveis apenas se desejar */
+.table-bordered td, 
+.table-bordered th {
+  border: 1px solid rgba(63, 191, 180, 0.3);
+}
+
+/* Ajuste para visual responsivo */
+@media (max-width: 640px) {
+  table {
+    font-size: 14px;
+  }
+  table th, table td {
+    padding: 8px 10px;
+  }
+}
+
+

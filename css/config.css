@@ -1,0 +1,169 @@
+/* Botão principal de envio */
+.tm-btn-submit {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 5px;
+  transition: 0.2s ease-in-out;
+}
+
+/* Container dos botões dentro dos cards */
+.botoes-livro {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 10px;
+  padding: 8px 0;
+  gap: 5px;
+}
+
+/* Estilo geral dos botões */
+.botoes-livro button {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Efeito ao passar o mouse */
+
+
+/* Ajuste visual dos cards */
+.card {
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Imagem dos livros: tamanho igual e bem cortada */
+.card-img-top {
+  height: 250px; /* altura padronizada */
+  width: 100%;
+  object-fit: cover; /* corta e ajusta sem distorcer */
+  border-radius: 8px 8px 0 0;
+}
+
+/* Estilo dos botões do Bootstrap */
+
+
+/* Ajuste da imagem e alinhamento geral */
+.card-body {
+  text-align: left;
+  padding: 15px;
+}
+
+/* Mantém o tamanho dos títulos e informações */
+.card-body h5 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.card-body p {
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+
+/* Container que organiza os botões lado a lado */
+.botoes-livro {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Estilo base dos botões */
+.botoes-livro button {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Botão: EMPRESTAR */
+.btn-emprestar {
+  background-color: #3b82f6; /* Azul padrão */
+}
+.btn-emprestar:hover {
+  background-color: #1d4ed8; /* Azul um pouco mais escuro */
+}
+
+/* Botão: LIDO */
+.btn-lido {
+  background-color: #22c55e; /* Verde */
+}
+.btn-lido:hover {
+  background-color: #15803d; /* Verde mais escuro */
+}
+
+/* Botão: DESEJADO */
+.btn-desejado {
+  background-color: #eab308; /* Amarelo Dourado */
+  color: #3a3a3a; /* texto mais visível */
+}
+.btn-desejado:hover {
+  background-color: #ca9800;
+}
+
+
+/* Organização dos elementos do filtro */
+form.d-flex.flex-wrap.justify-content-center.gap-3 {
+  gap: 12px;
+}
+
+/* Minimalismo nos selects */
+.form-select {
+  background: #ffffff;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 15px;
+  color: #333;
+  height: 42px;
+  transition: border-color .25s, box-shadow .25s;
+}
+
+/* Foco limpo e elegante */
+.form-select:focus {
+  border-color: #669999; 
+  box-shadow: 0 0 0 2px rgba(59,130,246,.25);
+}
+
+/* Botão Filtrar minimalista */
+.btn.btn-secondary {
+  background: #669999;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 20px;
+  font-weight: 500;
+  font-size: 15px;
+  height: 42px;
+  transition: background .25s, transform .15s;
+}
+
+/* Hover delicado */
+.btn.btn-secondary:hover {
+  background: #85cfcf;
+  transform: translateY(-1px);
+}
+
+/* Pequena harmonia no container */
+.container h2 {
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+
