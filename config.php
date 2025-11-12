@@ -2,20 +2,92 @@
 session_start();
 include 'conexao.php';
 
-// Se o usuário não estiver logado, redireciona
+// Verifica login
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
   header('Location: login.php');
   exit;
 }
 
 $idUsuario = $_SESSION['id_usuario'] ?? null;
+if (!$idUsuario) {
+  header('Location: login.php');
+  exit;
+}
 
 // Captura filtros e pesquisa
 $pesquisa = isset($_GET['pesquisa']) ? mysqli_real_escape_string($conexao, $_GET['pesquisa']) : '';
 $filtro_genero = isset($_GET['genero']) ? (int) $_GET['genero'] : 0;
 $filtro_autor = isset($_GET['autor']) ? (int) $_GET['autor'] : 0;
 
-// Consulta base
+// Processa as ações dos botões
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_POST['id_livro'])) {
+  $idLivro = (int) $_POST['id_livro'];
+  $acao = $_POST['acao'];
+
+  if ($acao === 'emprestar') {
+    // Remove de desejados antes de emprestar
+    $conexao->query("DELETE FROM desejados WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
+
+    $dataEmprestimo = date('Y-m-d');
+    $dataDevolucao = date('Y-m-d', strtotime('+14 days'));
+
+    // Verifica disponibilidade
+    $resDisp = $conexao->query("SELECT quantidade_disponivel FROM livros WHERE id_livro = $idLivro");
+    $rowDisp = $resDisp->fetch_assoc();
+    $qtdDisp = $rowDisp ? (int)$rowDisp['quantidade_disponivel'] : 0;
+
+    if ($qtdDisp > 0) {
+      $stmt = $conexao->prepare("INSERT INTO emprestimos (id_usuario, id_livro, data_emprestimo, data_prevista_devolucao, status) VALUES (?, ?, ?, ?, 'emprestado')");
+      $stmt->bind_param("iiss", $idUsuario, $idLivro, $dataEmprestimo, $dataDevolucao);
+      $stmt->execute();
+      $stmt->close();
+
+      // Decrementa quantidade
+      $conexao->query("UPDATE livros SET quantidade_disponivel = quantidade_disponivel - 1 WHERE id_livro = $idLivro");
+    } else {
+      error_log("Tentativa de emprestar livro sem disponibilidade: id_livro=$idLivro, id_usuario=$idUsuario");
+    }
+
+  } elseif ($acao === 'lido') {
+    // Remove de desejados e emprestimos antes de marcar como lido
+    $conexao->query("DELETE FROM desejados WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
+    $conexao->query("DELETE FROM emprestimos WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
+
+    // Marca como lido
+    $check = $conexao->prepare("SELECT COUNT(*) AS cnt FROM lidos WHERE id_usuario = ? AND id_livro = ?");
+    $check->bind_param("ii", $idUsuario, $idLivro);
+    $check->execute();
+    $res = $check->get_result();
+    $cnt = $res->fetch_assoc()['cnt'] ?? 0;
+    $check->close();
+
+    if ($cnt == 0) {
+      $stmt = $conexao->prepare("INSERT INTO lidos (id_usuario, id_livro, data_leitura) VALUES (?, ?, CURDATE())");
+      $stmt->bind_param("ii", $idUsuario, $idLivro);
+      $stmt->execute();
+      $stmt->close();
+    }
+
+    // Devolve o livro pro estoque se estava emprestado
+    $conexao->query("UPDATE livros SET quantidade_disponivel = quantidade_disponivel + 1 WHERE id_livro = $idLivro");
+
+  } elseif ($acao === 'desejado') {
+    // Remove de emprestimos e lidos antes de adicionar a desejados
+    $conexao->query("DELETE FROM emprestimos WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
+    $conexao->query("DELETE FROM lidos WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
+
+    // Adiciona na lista de desejados
+    $stmt = $conexao->prepare("INSERT IGNORE INTO desejados (id_usuario, id_livro) VALUES (?, ?)");
+    $stmt->bind_param("ii", $idUsuario, $idLivro);
+    $stmt->execute();
+    $stmt->close();
+  }
+
+  header('Location: dashboard.php');
+  exit;
+}
+
+// Consulta base de livros
 $sql = "
     SELECT 
         L.id_livro,
@@ -25,13 +97,12 @@ $sql = "
         L.capa,
         A.nome_autor,
         G.nome_genero
-    FROM Livros L
-    LEFT JOIN Autores A ON L.id_autor = A.id_autor
-    LEFT JOIN Generos G ON L.id_genero = G.id_genero
+    FROM livros L
+    LEFT JOIN autores A ON L.id_autor = A.id_autor
+    LEFT JOIN generos G ON L.id_genero = G.id_genero
     WHERE 1=1
 ";
 
-// Adiciona filtros dinamicamente
 if ($pesquisa !== '') {
   $sql .= " AND L.titulo LIKE '%$pesquisa%'";
 }
@@ -43,16 +114,12 @@ if ($filtro_autor > 0) {
 }
 
 $resultado = mysqli_query($conexao, $sql);
-
-// Busca dados para filtros
-$generos = mysqli_query($conexao, "SELECT * FROM Generos ORDER BY nome_genero");
-$autores = mysqli_query($conexao, "SELECT * FROM Autores ORDER BY nome_autor");
+$generos = mysqli_query($conexao, "SELECT * FROM generos ORDER BY nome_genero");
+$autores = mysqli_query($conexao, "SELECT * FROM autores ORDER BY nome_autor");
 ?>
 
 <?php include 'cabecalho_painel.php'; ?>
 
-
-<!-- Link para o CSS personalizado (verifique se o caminho está correto) -->
 <link rel="stylesheet" href="css/config.css">
 
 <div class="container mt-5">
@@ -89,12 +156,11 @@ $autores = mysqli_query($conexao, "SELECT * FROM Autores ORDER BY nome_autor");
 
   <!-- Lista de livros -->
   <div class="row">
-    <?php if (mysqli_num_rows($resultado) > 0): ?>
+    <?php if ($resultado && mysqli_num_rows($resultado) > 0): ?>
       <?php while ($livro = mysqli_fetch_assoc($resultado)): ?>
         <div class="col-md-4 mb-4">
           <div class="card h-100 shadow-sm">
-            
-            <!-- Exibe a imagem da capa (mesmo tamanho graças a .card-img-top) -->
+
             <?php if (!empty($livro['capa'])): ?>
               <img src="<?php echo htmlspecialchars($livro['capa']); ?>" class="card-img-top" alt="Capa do livro">
             <?php else: ?>
@@ -103,26 +169,25 @@ $autores = mysqli_query($conexao, "SELECT * FROM Autores ORDER BY nome_autor");
 
             <div class="card-body">
               <h5 class="card-title text-center"><?php echo htmlspecialchars($livro['titulo']); ?></h5>
-              <p class="card-text"><strong>Autor:</strong> <?php echo htmlspecialchars($livro['nome_autor'] ?? 'Desconhecido'); ?></p>
-              <p class="card-text"><strong>Gênero:</strong> <?php echo htmlspecialchars($livro['nome_genero'] ?? 'Não informado'); ?></p>
+              <p class="card-text"><strong>Autor:</strong> <?php echo htmlspecialchars($livro['nome_autor']); ?></p>
+              <p class="card-text"><strong>Gênero:</strong> <?php echo htmlspecialchars($livro['nome_genero']); ?></p>
               <p class="card-text"><strong>Ano:</strong> <?php echo htmlspecialchars($livro['ano_publicacao']); ?></p>
               <p class="card-text"><strong>Disponíveis:</strong> <?php echo htmlspecialchars($livro['quantidade_disponivel']); ?></p>
 
-              <!-- BOTÕES: usando as classes do seu CSS -->
-              <div class="botoes-livro">
-                <form method="POST" action="dashboard.php" style="flex:1;">
+              <div class="botoes-livro d-flex gap-2">
+                <form method="POST" style="flex:1;">
                   <input type="hidden" name="id_livro" value="<?php echo $livro['id_livro']; ?>">
-                  <button type="submit" name="acao" value="emprestar" class="btn-emprestar">Emprestar</button>
+                  <button type="submit" name="acao" value="emprestar" class="btn-emprestar w-100">Emprestar</button>
                 </form>
 
-                <form method="POST" action="dashboard.php" style="flex:1;">
+                <form method="POST" style="flex:1;">
                   <input type="hidden" name="id_livro" value="<?php echo $livro['id_livro']; ?>">
-                  <button type="submit" name="acao" value="lido" class="btn-lido">Lido</button>
+                  <button type="submit" name="acao" value="lido" class="btn-lido w-100">Lido</button>
                 </form>
 
-                <form method="POST" action="dashboard.php" style="flex:1;">
+                <form method="POST" style="flex:1;">
                   <input type="hidden" name="id_livro" value="<?php echo $livro['id_livro']; ?>">
-                  <button type="submit" name="acao" value="desejado" class="btn-desejado">Desejado</button>
+                  <button type="submit" name="acao" value="desejado" class="btn-desejado w-100">Desejado</button>
                 </form>
               </div>
             </div>

@@ -1,16 +1,16 @@
 <?php
 session_start();
-
-// se o usuário não estiver logado, redireciona para login
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+  header('Location: login.php');
+  exit;
+}
+include 'cabecalho_painel.php';
+include 'conexao.php';
+$idUsuario = $_SESSION['id_usuario'] ?? null;
+if (!$idUsuario) {
     header('Location: login.php');
     exit;
 }
-?>
-
-<?php
-  include 'cabecalho_painel.php';
-  include 'conexao.php'; // arquivo com sua conexão ao banco (ex: mysqli_connect)
 ?>
 
 <div class="row tm-welcome-row">
@@ -39,7 +39,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     <div class="tm-page-col-right tm-tab-contents">
       <div id="first-tab-group" class="tabgroup">
 
-        <!-- TAB 1 - EMPRÉSTIMOS -->
+        <!-- EMPRÉSTIMOS -->
         <div id="tab1">
           <h3 class="tm-text-secondary tm-mb-5">Empréstimos</h3>
           <table class="table table-striped table-bordered">
@@ -54,31 +54,36 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             </thead>
             <tbody>
               <?php
-                $sql = "SELECT L.titulo, A.nome_autor, E.data_emprestimo, E.data_prevista_devolucao, E.status
-                        FROM Emprestimos E
-                        JOIN Livros L ON E.id_livro = L.id_livro
-                        JOIN Autores A ON L.id_autor = A.id_autor";
-                $resultado = mysqli_query($conexao, $sql);
+              $sql = "SELECT L.titulo, A.nome_autor, E.data_emprestimo, E.data_prevista_devolucao, E.status
+                      FROM Emprestimos E
+                      JOIN Livros L ON E.id_livro = L.id_livro
+                      LEFT JOIN Autores A ON L.id_autor = A.id_autor
+                      WHERE E.id_usuario = ?";
+              $stmt = $conexao->prepare($sql);
+              $stmt->bind_param("i", $idUsuario);
+              $stmt->execute();
+              $resultado = $stmt->get_result();
 
-                if (mysqli_num_rows($resultado) > 0) {
-                  while ($row = mysqli_fetch_assoc($resultado)) {
-                    echo "<tr>
-                            <td>{$row['titulo']}</td>
-                            <td>{$row['nome_autor']}</td>
-                            <td>{$row['data_emprestimo']}</td>
-                            <td>{$row['data_prevista_devolucao']}</td>
-                            <td>{$row['status']}</td>
-                          </tr>";
-                  }
-                } else {
-                  echo "<tr><td colspan='5' class='text-center'>Nenhum empréstimo registrado.</td></tr>";
+              if ($resultado && mysqli_num_rows($resultado) > 0) {
+                while ($row = mysqli_fetch_assoc($resultado)) {
+                  echo "<tr>
+                          <td>".htmlspecialchars($row['titulo'])."</td>
+                          <td>".htmlspecialchars($row['nome_autor'])."</td>
+                          <td>".htmlspecialchars($row['data_emprestimo'])."</td>
+                          <td>".htmlspecialchars($row['data_prevista_devolucao'])."</td>
+                          <td>".htmlspecialchars($row['status'])."</td>
+                        </tr>";
                 }
+              } else {
+                echo "<tr><td colspan='5' class='text-center'>Nenhum empréstimo registrado.</td></tr>";
+              }
+              $stmt->close();
               ?>
             </tbody>
           </table>
         </div>
 
-        <!-- TAB 2 - LIDOS -->
+        <!-- LIDOS -->
         <div id="tab2">
           <h3 class="tm-text-secondary tm-mb-5">Lidos</h3>
           <table class="table table-striped table-bordered">
@@ -92,33 +97,36 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             </thead>
             <tbody>
               <?php
-                // Exemplo: livros já devolvidos (considerados "lidos")
-                $sqlLidos = "SELECT L.titulo, A.nome_autor, G.nome_genero, L.ano_publicacao
-                             FROM Emprestimos E
-                             JOIN Livros L ON E.id_livro = L.id_livro
-                             JOIN Autores A ON L.id_autor = A.id_autor
-                             JOIN Generos G ON L.id_genero = G.id_genero
-                             WHERE E.status = 'devolvido'";
-                $resLidos = mysqli_query($conexao, $sqlLidos);
+              $sqlLidos = "SELECT L.titulo, A.nome_autor, G.nome_genero, L.ano_publicacao
+                           FROM Lidos LD
+                           JOIN Livros L ON LD.id_livro = L.id_livro
+                           LEFT JOIN Autores A ON L.id_autor = A.id_autor
+                           LEFT JOIN Generos G ON L.id_genero = G.id_genero
+                           WHERE LD.id_usuario = ?";
+              $stmt = $conexao->prepare($sqlLidos);
+              $stmt->bind_param("i", $idUsuario);
+              $stmt->execute();
+              $resLidos = $stmt->get_result();
 
-                if (mysqli_num_rows($resLidos) > 0) {
-                  while ($row = mysqli_fetch_assoc($resLidos)) {
-                    echo "<tr>
-                            <td>{$row['titulo']}</td>
-                            <td>{$row['nome_autor']}</td>
-                            <td>{$row['nome_genero']}</td>
-                            <td>{$row['ano_publicacao']}</td>
-                          </tr>";
-                  }
-                } else {
-                  echo "<tr><td colspan='4' class='text-center'>Nenhum livro marcado como lido.</td></tr>";
+              if ($resLidos && mysqli_num_rows($resLidos) > 0) {
+                while ($row = mysqli_fetch_assoc($resLidos)) {
+                  echo "<tr>
+                          <td>".htmlspecialchars($row['titulo'])."</td>
+                          <td>".htmlspecialchars($row['nome_autor'])."</td>
+                          <td>".htmlspecialchars($row['nome_genero'])."</td>
+                          <td>".htmlspecialchars($row['ano_publicacao'])."</td>
+                        </tr>";
                 }
+              } else {
+                echo "<tr><td colspan='4' class='text-center'>Nenhum livro marcado como lido.</td></tr>";
+              }
+              $stmt->close();
               ?>
             </tbody>
           </table>
         </div>
 
-        <!-- TAB 3 - DESEJADOS -->
+        <!-- DESEJADOS -->
         <div id="tab3">
           <h3 class="tm-text-secondary tm-mb-5">Desejados</h3>
           <table class="table table-striped table-bordered">
@@ -131,26 +139,29 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             </thead>
             <tbody>
               <?php
-                // Exemplo: livros reservados (considerados "desejados")
-                $sqlDesejados = "SELECT L.titulo, A.nome_autor, G.nome_genero
-                                 FROM Reservas R
-                                 JOIN Livros L ON R.id_livro = L.id_livro
-                                 JOIN Autores A ON L.id_autor = A.id_autor
-                                 JOIN Generos G ON L.id_genero = G.id_genero
-                                 WHERE R.status = 'ativa'";
-                $resDesejados = mysqli_query($conexao, $sqlDesejados);
+              $sqlDesejados = "SELECT L.titulo, A.nome_autor, G.nome_genero
+                               FROM Desejados D
+                               JOIN Livros L ON D.id_livro = L.id_livro
+                               LEFT JOIN Autores A ON L.id_autor = A.id_autor
+                               LEFT JOIN Generos G ON L.id_genero = G.id_genero
+                               WHERE D.id_usuario = ?";
+              $stmt = $conexao->prepare($sqlDesejados);
+              $stmt->bind_param("i", $idUsuario);
+              $stmt->execute();
+              $resDesejados = $stmt->get_result();
 
-                if (mysqli_num_rows($resDesejados) > 0) {
-                  while ($row = mysqli_fetch_assoc($resDesejados)) {
-                    echo "<tr>
-                            <td>{$row['titulo']}</td>
-                            <td>{$row['nome_autor']}</td>
-                            <td>{$row['nome_genero']}</td>
-                          </tr>";
-                  }
-                } else {
-                  echo "<tr><td colspan='3' class='text-center'>Nenhum livro desejado encontrado.</td></tr>";
+              if ($resDesejados && mysqli_num_rows($resDesejados) > 0) {
+                while ($row = mysqli_fetch_assoc($resDesejados)) {
+                  echo "<tr>
+                          <td>".htmlspecialchars($row['titulo'])."</td>
+                          <td>".htmlspecialchars($row['nome_autor'])."</td>
+                          <td>".htmlspecialchars($row['nome_genero'])."</td>
+                        </tr>";
                 }
+              } else {
+                echo "<tr><td colspan='3' class='text-center'>Nenhum livro desejado encontrado.</td></tr>";
+              }
+              $stmt->close();
               ?>
             </tbody>
           </table>
@@ -161,6 +172,4 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
   </div>
 </section>
 
-<?php
-  include 'footer.php';
-?>
+<?php include 'footer.php'; ?>
