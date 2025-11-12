@@ -16,13 +16,12 @@ if (isset($_POST['atualizar'])) {
   $id_livro = $_POST['id_livro'];
   $quantidade_total = $_POST['quantidade_total'];
   $quantidade_disponivel = $_POST['quantidade_disponivel'];
-  $valor = $_POST['valor'];
 
   $sql_update = "UPDATE Livros 
-                   SET quantidade_total = ?, quantidade_disponivel = ?, valor = ?
+                   SET quantidade_total = ?, quantidade_disponivel = ?
                    WHERE id_livro = ?";
   $stmt = $conn->prepare($sql_update);
-  $stmt->bind_param("iidi", $quantidade_total, $quantidade_disponivel, $valor, $id_livro);
+  $stmt->bind_param("iii", $quantidade_total, $quantidade_disponivel, $id_livro);
   $stmt->execute();
 }
 
@@ -117,6 +116,7 @@ if ($pesquisa != "") {
         <?php endif; ?>
       </tbody>
     </table>
+
     <div class="acoes-estoque">
       <a href="adicionar_livro.php" class="botao-adicionar">+ Adicionar Novo Livro</a>
     </div>
