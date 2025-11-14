@@ -1,5 +1,5 @@
 <?php
-  include 'cabecalho.php';
+  include 'cabecalho_painel.php';
   include 'conexao.php'; // arquivo com sua conexão ao banco (ex: mysqli_connect)
 ?>
 
