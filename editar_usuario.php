@@ -1,22 +1,12 @@
 <?php
-  include 'cabecalho_painel.php';
-  include 'conexao.php'; // arquivo com sua conexão ao banco (ex: mysqli_connect)
-?>
-
-<?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "biblioteca_blook";
-
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-    die("Erro na conexão: " . $conn->connect_error);
-}
+include 'cabecalho_painel.php';
+include 'conexao.php'; // conexão já definida aqui
+session_start();
 
 $usuario = null;
 $mensagem = '';
 
+// Processar atualização do usuário
 if (isset($_POST['salvar_edicao'])) {
     $id_usuario = $_POST['id_usuario'];
     $nome = $_POST['nome'];
@@ -24,22 +14,23 @@ if (isset($_POST['salvar_edicao'])) {
     $email = $_POST['email'];
     $tipo_usuario = $_POST['tipo_usuario'];
 
-    $stmt = $conn->prepare("UPDATE Usuarios SET nome = ?, telefone = ?, email = ?, tipo_usuario = ? WHERE id_usuario = ?");
+    $stmt = $conexao->prepare("UPDATE Usuarios SET nome = ?, telefone = ?, email = ?, tipo_usuario = ? WHERE id_usuario = ?");
     $stmt->bind_param("ssssi", $nome, $telefone, $email, $tipo_usuario, $id_usuario);
 
     if ($stmt->execute()) {
         header("Location: adm.php?status=sucesso_edicao");
         exit();
     } else {
-        $mensagem = "Erro ao atualizar: " . $conn->error;
+        $mensagem = "Erro ao atualizar: " . $conexao->error;
     }
     $stmt->close();
 }
 
+// Buscar dados do usuário para exibir no formulário
 if (isset($_GET['id_usuario']) || isset($_POST['id_usuario'])) {
     $id_usuario = isset($_GET['id_usuario']) ? $_GET['id_usuario'] : $_POST['id_usuario'];
 
-    $stmt = $conn->prepare("SELECT id_usuario, nome, telefone, email, tipo_usuario FROM Usuarios WHERE id_usuario = ?");
+    $stmt = $conexao->prepare("SELECT id_usuario, nome, telefone, email, tipo_usuario FROM Usuarios WHERE id_usuario = ?");
     $stmt->bind_param("i", $id_usuario);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -51,8 +42,6 @@ if (isset($_GET['id_usuario']) || isset($_POST['id_usuario'])) {
     }
     $stmt->close();
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -67,12 +56,12 @@ $conn->close();
         <h1>Editar Usuário</h1>
 
         <?php if ($mensagem): ?>
-            <p style="color: red;"><?= $mensagem ?></p>
+            <p style="color: red;"><?= htmlspecialchars($mensagem) ?></p>
         <?php endif; ?>
 
         <?php if ($usuario): ?>
         <form method="POST" action="editar_usuario.php">
-            <input type="hidden" name="id_usuario" value="<?= $usuario['id_usuario'] ?>">
+            <input type="hidden" name="id_usuario" value="<?= htmlspecialchars($usuario['id_usuario']) ?>">
 
             <label for="nome">Nome Completo:</label>
             <input type="text" id="nome" name="nome" value="<?= htmlspecialchars($usuario['nome']) ?>" required><br><br>
@@ -85,8 +74,8 @@ $conn->close();
 
             <label for="tipo_usuario">Tipo de Usuário:</label>
             <select id="tipo_usuario" name="tipo_usuario" required>
-                <option value="leitor" <?= $usuario['tipo_usuario'] === 'leitor' ? 'selected' : '' ?>>Leitor</option>
-                <option value="admin" <?= $usuario['tipo_usuario'] === 'admin' ? 'selected' : '' ?>>Administrador</option>
+                <option value="leitor" <?= htmlspecialchars($usuario['tipo_usuario']) === 'leitor' ? 'selected' : '' ?>>Leitor</option>
+                <option value="admin" <?= htmlspecialchars($usuario['tipo_usuario']) === 'admin' ? 'selected' : '' ?>>Administrador</option>
             </select><br><br>
 
             <div class="botoes-acao">
@@ -98,6 +87,7 @@ $conn->close();
             <p>ID do usuário não fornecido para edição.</p>
         <?php endif; ?>
     </div>
+
 <?php
-  include 'footer.php';
+include 'footer.php';
 ?>

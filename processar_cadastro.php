@@ -2,11 +2,11 @@
 include 'conexao.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nome = mysqli_real_escape_string($conexao, $_POST['full_name']);
-    $email = mysqli_real_escape_string($conexao, $_POST['email']);
-    $usuario = mysqli_real_escape_string($conexao, $_POST['contact_name']);
-    $senha = mysqli_real_escape_string($conexao, $_POST['contact_password']);
-    $confirmar = mysqli_real_escape_string($conexao, $_POST['confirm_password']);
+    $nome = $_POST['full_name'];
+    $email = $_POST['email'];
+    $usuario = $_POST['contact_name'];
+    $senha = $_POST['contact_password'];
+    $confirmar = $_POST['confirm_password'];
 
     // Verifica se as senhas coincidem
     if ($senha !== $confirmar) {
@@ -14,29 +14,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Verifica se o e-mail já existe
-    $verificaEmail = mysqli_query($conexao, "SELECT * FROM Usuarios WHERE email = '$email'");
-    if (mysqli_num_rows($verificaEmail) > 0) {
+    // Verifica se o e-mail já existe usando prepared statement
+    $stmt = $conexao->prepare("SELECT * FROM Usuarios WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
         echo "<script>alert('Este e-mail já está cadastrado!'); window.history.back();</script>";
         exit;
     }
+    $stmt->close();
 
     // Criptografa a senha
     $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-    // Insere no banco
-    $sql = "INSERT INTO Usuarios (nome, email, senha, tipo_usuario) 
-            VALUES ('$nome', '$email', '$senhaHash', 'leitor')";
+    // Insere no banco usando prepared statement
+    $stmt = $conexao->prepare("INSERT INTO Usuarios (nome, email, senha, tipo_usuario) VALUES (?, ?, ?, 'leitor')");
+    $stmt->bind_param("sss", $nome, $email, $senhaHash);
 
-    if (mysqli_query($conexao, $sql)) {
+    if ($stmt->execute()) {
         echo "<script>
                 alert('Cadastro realizado com sucesso! Faça login para continuar.');
                 window.location.href = 'login.php';
               </script>";
     } else {
-        echo "<script>alert('Erro ao cadastrar: " . mysqli_error($conexao) . "');</script>";
+        echo "<script>alert('Erro ao cadastrar: " . $stmt->error . "');</script>";
     }
+
+    $stmt->close();
 }
 
-mysqli_close($conexao);
+$conexao->close();
 ?>

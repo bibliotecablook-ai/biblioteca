@@ -13,8 +13,18 @@ if ($conn->connect_error) {
 
 if (isset($_POST['excluir'])) {
     $id_usuario = $_POST['id_usuario'];
-    $sql_delete = "DELETE FROM Usuarios WHERE id_usuario = $id_usuario";
-    $conn->query($sql_delete);
+
+    // --- CORREÇÃO DO SQL INJECTION ---
+    $sql_delete = "DELETE FROM Usuarios WHERE id_usuario = ?";
+    $stmt_delete = $conn->prepare($sql_delete);
+
+    if ($stmt_delete) {
+        $stmt_delete->bind_param("i", $id_usuario);
+        $stmt_delete->execute();
+        $stmt_delete->close();
+    } else {
+        echo "Erro ao preparar a exclusão.";
+    }
 }
 
 $pesquisa = "";

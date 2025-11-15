@@ -4,14 +4,14 @@ include 'conexao.php';
 
 // Verifica login
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-  header('Location: login.php');
-  exit;
+    header('Location: login.php');
+    exit;
 }
 
 $idUsuario = $_SESSION['id_usuario'] ?? null;
 if (!$idUsuario) {
-  header('Location: login.php');
-  exit;
+    header('Location: login.php');
+    exit;
 }
 
 // Captura filtros e pesquisa
@@ -19,103 +19,154 @@ $pesquisa = isset($_GET['pesquisa']) ? mysqli_real_escape_string($conexao, $_GET
 $filtro_genero = isset($_GET['genero']) ? (int) $_GET['genero'] : 0;
 $filtro_autor = isset($_GET['autor']) ? (int) $_GET['autor'] : 0;
 
-// Processa as ações dos botões
+// Processa ações dos botões
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_POST['id_livro'])) {
-  $idLivro = (int) $_POST['id_livro'];
-  $acao = $_POST['acao'];
+    $idLivro = (int) $_POST['id_livro'];
+    $acao = $_POST['acao'];
 
-  if ($acao === 'emprestar') {
-    // Remove de desejados antes de emprestar
-    $conexao->query("DELETE FROM desejados WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
+    if ($acao === 'emprestar') {
+        // Remove de desejados antes de emprestar
+        $stmt = $conexao->prepare("DELETE FROM desejados WHERE id_usuario = ? AND id_livro = ?");
+        $stmt->bind_param("ii", $idUsuario, $idLivro);
+        $stmt->execute();
+        $stmt->close();
 
-    $dataEmprestimo = date('Y-m-d');
-    $dataDevolucao = date('Y-m-d', strtotime('+14 days'));
+        $dataEmprestimo = date('Y-m-d');
+        $dataDevolucao = date('Y-m-d', strtotime('+14 days'));
 
-    // Verifica disponibilidade
-    $resDisp = $conexao->query("SELECT quantidade_disponivel FROM livros WHERE id_livro = $idLivro");
-    $rowDisp = $resDisp->fetch_assoc();
-    $qtdDisp = $rowDisp ? (int)$rowDisp['quantidade_disponivel'] : 0;
+        // Verifica disponibilidade
+        $stmt = $conexao->prepare("SELECT quantidade_disponivel FROM livros WHERE id_livro = ?");
+        $stmt->bind_param("i", $idLivro);
+        $stmt->execute();
+        $resDisp = $stmt->get_result();
+        $rowDisp = $resDisp->fetch_assoc();
+        $qtdDisp = $rowDisp ? (int)$rowDisp['quantidade_disponivel'] : 0;
+        $stmt->close();
 
-    if ($qtdDisp > 0) {
-      $stmt = $conexao->prepare("INSERT INTO emprestimos (id_usuario, id_livro, data_emprestimo, data_prevista_devolucao, status) VALUES (?, ?, ?, ?, 'emprestado')");
-      $stmt->bind_param("iiss", $idUsuario, $idLivro, $dataEmprestimo, $dataDevolucao);
-      $stmt->execute();
-      $stmt->close();
+        if ($qtdDisp > 0) {
+            $stmt = $conexao->prepare("INSERT INTO emprestimos (id_usuario, id_livro, data_emprestimo, data_prevista_devolucao, status) VALUES (?, ?, ?, ?, 'emprestado')");
+            $stmt->bind_param("iiss", $idUsuario, $idLivro, $dataEmprestimo, $dataDevolucao);
+            $stmt->execute();
+            $stmt->close();
 
-      // Decrementa quantidade
-      $conexao->query("UPDATE livros SET quantidade_disponivel = quantidade_disponivel - 1 WHERE id_livro = $idLivro");
-    } else {
-      error_log("Tentativa de emprestar livro sem disponibilidade: id_livro=$idLivro, id_usuario=$idUsuario");
+            // Decrementa quantidade
+            $stmt = $conexao->prepare("UPDATE livros SET quantidade_disponivel = quantidade_disponivel - 1 WHERE id_livro = ?");
+            $stmt->bind_param("i", $idLivro);
+            $stmt->execute();
+            $stmt->close();
+        } else {
+            error_log("Tentativa de emprestar livro sem disponibilidade: id_livro=$idLivro, id_usuario=$idUsuario");
+        }
+
+    } elseif ($acao === 'lido') {
+        // Remove de desejados e empréstimos antes de marcar como lido
+        $stmt = $conexao->prepare("DELETE FROM desejados WHERE id_usuario = ? AND id_livro = ?");
+        $stmt->bind_param("ii", $idUsuario, $idLivro);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conexao->prepare("DELETE FROM emprestimos WHERE id_usuario = ? AND id_livro = ?");
+        $stmt->bind_param("ii", $idUsuario, $idLivro);
+        $stmt->execute();
+        $stmt->close();
+
+        // Marca como lido apenas se não estiver já marcado
+        $stmt = $conexao->prepare("SELECT COUNT(*) AS cnt FROM lidos WHERE id_usuario = ? AND id_livro = ?");
+        $stmt->bind_param("ii", $idUsuario, $idLivro);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $cnt = $res->fetch_assoc()['cnt'] ?? 0;
+        $stmt->close();
+
+        if ($cnt == 0) {
+            $stmt = $conexao->prepare("INSERT INTO lidos (id_usuario, id_livro, data_leitura) VALUES (?, ?, CURDATE())");
+            $stmt->bind_param("ii", $idUsuario, $idLivro);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        // Devolve livro para estoque
+        $stmt = $conexao->prepare("UPDATE livros SET quantidade_disponivel = quantidade_disponivel + 1 WHERE id_livro = ?");
+        $stmt->bind_param("i", $idLivro);
+        $stmt->execute();
+        $stmt->close();
+
+    } elseif ($acao === 'desejado') {
+        // Remove de empréstimos e lidos antes de adicionar à desejados
+        $stmt = $conexao->prepare("DELETE FROM emprestimos WHERE id_usuario = ? AND id_livro = ?");
+        $stmt->bind_param("ii", $idUsuario, $idLivro);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conexao->prepare("DELETE FROM lidos WHERE id_usuario = ? AND id_livro = ?");
+        $stmt->bind_param("ii", $idUsuario, $idLivro);
+        $stmt->execute();
+        $stmt->close();
+
+        // Adiciona à lista de desejados
+        $stmt = $conexao->prepare("INSERT IGNORE INTO desejados (id_usuario, id_livro) VALUES (?, ?)");
+        $stmt->bind_param("ii", $idUsuario, $idLivro);
+        $stmt->execute();
+        $stmt->close();
     }
 
-  } elseif ($acao === 'lido') {
-    // Remove de desejados e emprestimos antes de marcar como lido
-    $conexao->query("DELETE FROM desejados WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
-    $conexao->query("DELETE FROM emprestimos WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
-
-    // Marca como lido
-    $check = $conexao->prepare("SELECT COUNT(*) AS cnt FROM lidos WHERE id_usuario = ? AND id_livro = ?");
-    $check->bind_param("ii", $idUsuario, $idLivro);
-    $check->execute();
-    $res = $check->get_result();
-    $cnt = $res->fetch_assoc()['cnt'] ?? 0;
-    $check->close();
-
-    if ($cnt == 0) {
-      $stmt = $conexao->prepare("INSERT INTO lidos (id_usuario, id_livro, data_leitura) VALUES (?, ?, CURDATE())");
-      $stmt->bind_param("ii", $idUsuario, $idLivro);
-      $stmt->execute();
-      $stmt->close();
-    }
-
-    // Devolve o livro pro estoque se estava emprestado
-    $conexao->query("UPDATE livros SET quantidade_disponivel = quantidade_disponivel + 1 WHERE id_livro = $idLivro");
-
-  } elseif ($acao === 'desejado') {
-    // Remove de emprestimos e lidos antes de adicionar a desejados
-    $conexao->query("DELETE FROM emprestimos WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
-    $conexao->query("DELETE FROM lidos WHERE id_usuario = $idUsuario AND id_livro = $idLivro");
-
-    // Adiciona na lista de desejados
-    $stmt = $conexao->prepare("INSERT IGNORE INTO desejados (id_usuario, id_livro) VALUES (?, ?)");
-    $stmt->bind_param("ii", $idUsuario, $idLivro);
-    $stmt->execute();
-    $stmt->close();
-  }
-
-  header('Location: dashboard.php');
-  exit;
+    header('Location: dashboard.php');
+    exit;
 }
 
-// Consulta base de livros
-$sql = "
-    SELECT 
-        L.id_livro,
-        L.titulo,
-        L.ano_publicacao,
-        L.quantidade_disponivel,
-        L.capa,
-        A.nome_autor,
-        G.nome_genero
-    FROM livros L
-    LEFT JOIN autores A ON L.id_autor = A.id_autor
-    LEFT JOIN generos G ON L.id_genero = G.id_genero
-    WHERE 1=1
-";
+// Consulta base de livros com filtros
+$sql = "SELECT 
+            L.id_livro,
+            L.titulo,
+            L.ano_publicacao,
+            L.quantidade_disponivel,
+            L.capa,
+            A.nome_autor,
+            G.nome_genero
+        FROM livros L
+        LEFT JOIN autores A ON L.id_autor = A.id_autor
+        LEFT JOIN generos G ON L.id_genero = G.id_genero
+        WHERE 1=1";
 
 if ($pesquisa !== '') {
-  $sql .= " AND L.titulo LIKE '%$pesquisa%'";
+    $sql .= " AND L.titulo LIKE ?";
 }
 if ($filtro_genero > 0) {
-  $sql .= " AND L.id_genero = $filtro_genero";
+    $sql .= " AND L.id_genero = ?";
 }
 if ($filtro_autor > 0) {
-  $sql .= " AND L.id_autor = $filtro_autor";
+    $sql .= " AND L.id_autor = ?";
 }
 
-$resultado = mysqli_query($conexao, $sql);
+$stmt = $conexao->prepare($sql);
+
+// Bind dinâmico
+$params = [];
+$types = '';
+if ($pesquisa !== '') {
+    $params[] = "%$pesquisa%";
+    $types .= 's';
+}
+if ($filtro_genero > 0) {
+    $params[] = $filtro_genero;
+    $types .= 'i';
+}
+if ($filtro_autor > 0) {
+    $params[] = $filtro_autor;
+    $types .= 'i';
+}
+
+if ($params) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$resultado = $stmt->get_result();
+$stmt->close();
+
 $generos = mysqli_query($conexao, "SELECT * FROM generos ORDER BY nome_genero");
 $autores = mysqli_query($conexao, "SELECT * FROM autores ORDER BY nome_autor");
+
 ?>
 
 <?php include 'cabecalho_painel.php'; ?>
