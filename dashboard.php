@@ -1,17 +1,28 @@
 <?php
 session_start();
+
+// Impede acesso sem login
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
   header('Location: login.php');
   exit;
 }
+
 include 'cabecalho_painel.php';
 include 'conexao.php';
+
 $idUsuario = $_SESSION['id_usuario'] ?? null;
 if (!$idUsuario) {
     header('Location: login.php');
     exit;
 }
 ?>
+
+<?php if (isset($_SESSION['mensagem_sucesso'])): ?>
+<script>
+alert('<?php echo $_SESSION['mensagem_sucesso']; ?>');
+</script>
+<?php unset($_SESSION['mensagem_sucesso']); ?>
+<?php endif; ?>
 
 <div class="row tm-welcome-row">
   <div class="col-12 tm-page-cols-container">
@@ -39,7 +50,7 @@ if (!$idUsuario) {
     <div class="tm-page-col-right tm-tab-contents">
       <div id="first-tab-group" class="tabgroup">
 
-        <!-- EMPRÉSTIMOS -->
+        <!-- ================= EMPRÉSTIMOS ================= -->
         <div id="tab1">
           <h3 class="tm-text-secondary tm-mb-5">Empréstimos</h3>
           <table class="table table-striped table-bordered">
@@ -83,7 +94,7 @@ if (!$idUsuario) {
           </table>
         </div>
 
-        <!-- LIDOS -->
+        <!-- ================= LIDOS ================= -->
         <div id="tab2">
           <h3 class="tm-text-secondary tm-mb-5">Lidos</h3>
           <table class="table table-striped table-bordered">
@@ -120,13 +131,12 @@ if (!$idUsuario) {
               } else {
                 echo "<tr><td colspan='4' class='text-center'>Nenhum livro marcado como lido.</td></tr>";
               }
-              $stmt->close();
               ?>
             </tbody>
           </table>
         </div>
 
-        <!-- DESEJADOS -->
+        <!-- ================= DESEJADOS ================= -->
         <div id="tab3">
           <h3 class="tm-text-secondary tm-mb-5">Desejados</h3>
           <table class="table table-striped table-bordered">
@@ -161,7 +171,6 @@ if (!$idUsuario) {
               } else {
                 echo "<tr><td colspan='3' class='text-center'>Nenhum livro desejado encontrado.</td></tr>";
               }
-              $stmt->close();
               ?>
             </tbody>
           </table>

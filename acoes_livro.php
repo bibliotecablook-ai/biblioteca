@@ -11,72 +11,72 @@ $idUsuario = $_SESSION['id_usuario'];
 $idLivro   = $_POST['id_livro'] ?? null;
 $acao      = $_POST['acao'] ?? null;
 
-// --- Validação simples ---
 if (!is_numeric($idLivro)) {
-    die("ID inválido.");
+    $_SESSION['mensagem_sucesso'] = "ID do livro inválido.";
+    header("Location: config.php");
+    exit;
 }
 
-// ===== AÇÃO: EMPRESTAR =====
+// --- EMPRESTAR ---
 if ($acao === 'emprestar') {
 
-    // Inserir empréstimo
     $stmt = $conexao->prepare("
-        INSERT INTO Emprestimos 
-        (id_livro, id_usuario, data_emprestimo, data_prevista_devolucao)
+        INSERT INTO Emprestimos (id_livro, id_usuario, data_emprestimo, data_prevista_devolucao)
         VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 15 DAY))
     ");
     $stmt->bind_param("ii", $idLivro, $idUsuario);
     $stmt->execute();
     $stmt->close();
 
-    // Atualizar quantidade
     $stmt = $conexao->prepare("
-        UPDATE Livros 
-        SET quantidade_disponivel = GREATEST(quantidade_disponivel - 1, 0)
+        UPDATE Livros SET quantidade_disponivel = GREATEST(quantidade_disponivel - 1, 0)
         WHERE id_livro = ?
     ");
     $stmt->bind_param("i", $idLivro);
     $stmt->execute();
     $stmt->close();
 
-    echo "<script>alert('Empréstimo registrado com sucesso!'); window.location='dashboard.php#tab1';</script>";
+    $_SESSION['mensagem_sucesso'] = "Empréstimo registrado com sucesso!";
+    header("Location: config.php?tab=1");
     exit;
 }
 
 
-// ===== AÇÃO: LIDO =====
+// --- LIDO ---
 if ($acao === 'lido') {
 
     $stmt = $conexao->prepare("
-        INSERT INTO Emprestimos 
-        (id_livro, id_usuario, data_emprestimo, data_prevista_devolucao, data_devolucao, status)
-        VALUES (?, ?, CURDATE(), CURDATE(), CURDATE(), 'devolvido')
+        INSERT INTO Lidos (id_livro, id_usuario, data_registro)
+        VALUES (?, ?, CURDATE())
     ");
     $stmt->bind_param("ii", $idLivro, $idUsuario);
     $stmt->execute();
     $stmt->close();
 
-    echo "<script>alert('Livro marcado como lido!'); window.location='dashboard.php#tab2';</script>";
+    $_SESSION['mensagem_sucesso'] = "Livro marcado como lido!";
+    header("Location: config.php?tab=2");
     exit;
 }
 
 
-// ===== AÇÃO: DESEJADO =====
+// --- DESEJADO ---
 if ($acao === 'desejado') {
-
     $stmt = $conexao->prepare("
-        INSERT INTO Reservas (id_livro, id_usuario) 
+        INSERT INTO Desejados (id_livro, id_usuario)
         VALUES (?, ?)
     ");
     $stmt->bind_param("ii", $idLivro, $idUsuario);
     $stmt->execute();
     $stmt->close();
 
-    echo "<script>alert('Livro adicionado à sua lista de desejados!'); window.location='dashboard.php#tab3';</script>";
+    $_SESSION['mensagem_sucesso'] = "Livro adicionado à sua lista de desejados!";
+    header("Location: config.php?tab=3");
     exit;
 }
 
 
-// Fim
-mysqli_close($conexao);
+// --- Default ---
+$_SESSION['mensagem_sucesso'] = "Ação inválida!";
+header("Location: config.php");
+exit;
 ?>

@@ -25,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
     $acao = $_POST['acao'];
 
     if ($acao === 'emprestar') {
-        // Remove de desejados antes de emprestar
         $stmt = $conexao->prepare("DELETE FROM desejados WHERE id_usuario = ? AND id_livro = ?");
         $stmt->bind_param("ii", $idUsuario, $idLivro);
         $stmt->execute();
@@ -34,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
         $dataEmprestimo = date('Y-m-d');
         $dataDevolucao = date('Y-m-d', strtotime('+14 days'));
 
-        // Verifica disponibilidade
         $stmt = $conexao->prepare("SELECT quantidade_disponivel FROM livros WHERE id_livro = ?");
         $stmt->bind_param("i", $idLivro);
         $stmt->execute();
@@ -49,17 +47,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
             $stmt->execute();
             $stmt->close();
 
-            // Decrementa quantidade
             $stmt = $conexao->prepare("UPDATE livros SET quantidade_disponivel = quantidade_disponivel - 1 WHERE id_livro = ?");
             $stmt->bind_param("i", $idLivro);
             $stmt->execute();
             $stmt->close();
+
+            $_SESSION['mensagem_sucesso'] = "📚 Empréstimo realizado com sucesso!";
         } else {
-            error_log("Tentativa de emprestar livro sem disponibilidade: id_livro=$idLivro, id_usuario=$idUsuario");
+            $_SESSION['mensagem_sucesso'] = "❌ Livro indisponível no momento.";
         }
 
     } elseif ($acao === 'lido') {
-        // Remove de desejados e empréstimos antes de marcar como lido
         $stmt = $conexao->prepare("DELETE FROM desejados WHERE id_usuario = ? AND id_livro = ?");
         $stmt->bind_param("ii", $idUsuario, $idLivro);
         $stmt->execute();
@@ -70,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
         $stmt->execute();
         $stmt->close();
 
-        // Marca como lido apenas se não estiver já marcado
         $stmt = $conexao->prepare("SELECT COUNT(*) AS cnt FROM lidos WHERE id_usuario = ? AND id_livro = ?");
         $stmt->bind_param("ii", $idUsuario, $idLivro);
         $stmt->execute();
@@ -85,14 +82,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
             $stmt->close();
         }
 
-        // Devolve livro para estoque
         $stmt = $conexao->prepare("UPDATE livros SET quantidade_disponivel = quantidade_disponivel + 1 WHERE id_livro = ?");
         $stmt->bind_param("i", $idLivro);
         $stmt->execute();
         $stmt->close();
 
+        $_SESSION['mensagem_sucesso'] = "📘 Livro marcado como lido!";
+
     } elseif ($acao === 'desejado') {
-        // Remove de empréstimos e lidos antes de adicionar à desejados
         $stmt = $conexao->prepare("DELETE FROM emprestimos WHERE id_usuario = ? AND id_livro = ?");
         $stmt->bind_param("ii", $idUsuario, $idLivro);
         $stmt->execute();
@@ -103,63 +100,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
         $stmt->execute();
         $stmt->close();
 
-        // Adiciona à lista de desejados
         $stmt = $conexao->prepare("INSERT IGNORE INTO desejados (id_usuario, id_livro) VALUES (?, ?)");
         $stmt->bind_param("ii", $idUsuario, $idLivro);
         $stmt->execute();
         $stmt->close();
+
+        $_SESSION['mensagem_sucesso'] = "⭐ Livro adicionado aos desejados!";
     }
 
     header('Location: dashboard.php');
     exit;
 }
 
-// Consulta base de livros com filtros
-$sql = "SELECT 
-            L.id_livro,
-            L.titulo,
-            L.ano_publicacao,
-            L.quantidade_disponivel,
-            L.capa,
-            A.nome_autor,
-            G.nome_genero
+// Consulta livros
+$sql = "SELECT L.id_livro, L.titulo, L.ano_publicacao, L.quantidade_disponivel, L.capa, A.nome_autor, G.nome_genero
         FROM livros L
         LEFT JOIN autores A ON L.id_autor = A.id_autor
         LEFT JOIN generos G ON L.id_genero = G.id_genero
         WHERE 1=1";
 
-if ($pesquisa !== '') {
-    $sql .= " AND L.titulo LIKE ?";
-}
-if ($filtro_genero > 0) {
-    $sql .= " AND L.id_genero = ?";
-}
-if ($filtro_autor > 0) {
-    $sql .= " AND L.id_autor = ?";
-}
-
-$stmt = $conexao->prepare($sql);
-
-// Bind dinâmico
 $params = [];
 $types = '';
-if ($pesquisa !== '') {
-    $params[] = "%$pesquisa%";
-    $types .= 's';
-}
-if ($filtro_genero > 0) {
-    $params[] = $filtro_genero;
-    $types .= 'i';
-}
-if ($filtro_autor > 0) {
-    $params[] = $filtro_autor;
-    $types .= 'i';
-}
 
-if ($params) {
-    $stmt->bind_param($types, ...$params);
-}
+if ($pesquisa !== '') { $sql .= " AND L.titulo LIKE ?"; $params[] = "%$pesquisa%"; $types .= 's'; }
+if ($filtro_genero > 0) { $sql .= " AND L.id_genero = ?"; $params[] = $filtro_genero; $types .= 'i'; }
+if ($filtro_autor > 0) { $sql .= " AND L.id_autor = ?"; $params[] = $filtro_autor; $types .= 'i'; }
 
+$stmt = $conexao->prepare($sql);
+if ($params) $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $resultado = $stmt->get_result();
 $stmt->close();
@@ -167,13 +135,22 @@ $stmt->close();
 $generos = mysqli_query($conexao, "SELECT * FROM generos ORDER BY nome_genero");
 $autores = mysqli_query($conexao, "SELECT * FROM autores ORDER BY nome_autor");
 
+include 'cabecalho_painel.php';
 ?>
-
-<?php include 'cabecalho_painel.php'; ?>
 
 <link rel="stylesheet" href="css/config.css">
 
 <div class="container mt-5">
+
+  <?php if (isset($_SESSION['mensagem_sucesso'])): ?>
+      <div class="alert alert-info text-center" role="alert">
+          <?php 
+            echo htmlspecialchars($_SESSION['mensagem_sucesso']);
+            unset($_SESSION['mensagem_sucesso']);
+          ?>
+      </div>
+  <?php endif; ?>
+
   <h2 class="text-center mb-4">Biblioteca Blook</h2>
   <p class="text-center">
     <em><?php echo htmlspecialchars($_SESSION['nome']); ?>, seja bem-vindo(a) à sua nova biblioteca virtual!</em>
@@ -220,10 +197,10 @@ $autores = mysqli_query($conexao, "SELECT * FROM autores ORDER BY nome_autor");
 
             <div class="card-body">
               <h5 class="card-title text-center"><?php echo htmlspecialchars($livro['titulo']); ?></h5>
-              <p class="card-text"><strong>Autor:</strong> <?php echo htmlspecialchars($livro['nome_autor']); ?></p>
-              <p class="card-text"><strong>Gênero:</strong> <?php echo htmlspecialchars($livro['nome_genero']); ?></p>
-              <p class="card-text"><strong>Ano:</strong> <?php echo htmlspecialchars($livro['ano_publicacao']); ?></p>
-              <p class="card-text"><strong>Disponíveis:</strong> <?php echo htmlspecialchars($livro['quantidade_disponivel']); ?></p>
+              <p><strong>Autor:</strong> <?php echo htmlspecialchars($livro['nome_autor']); ?></p>
+              <p><strong>Gênero:</strong> <?php echo htmlspecialchars($livro['nome_genero']); ?></p>
+              <p><strong>Ano:</strong> <?php echo htmlspecialchars($livro['ano_publicacao']); ?></p>
+              <p><strong>Disponíveis:</strong> <?php echo htmlspecialchars($livro['quantidade_disponivel']); ?></p>
 
               <div class="botoes-livro d-flex gap-2">
                 <form method="POST" style="flex:1;">
@@ -241,6 +218,7 @@ $autores = mysqli_query($conexao, "SELECT * FROM autores ORDER BY nome_autor");
                   <button type="submit" name="acao" value="desejado" class="btn-desejado w-100">Desejado</button>
                 </form>
               </div>
+
             </div>
           </div>
         </div>

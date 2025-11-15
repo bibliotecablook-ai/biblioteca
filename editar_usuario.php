@@ -6,6 +6,11 @@ session_start();
 $usuario = null;
 $mensagem = '';
 
+// Se voltou de uma atualização com sucesso, exibir aviso
+if (isset($_GET['status']) && $_GET['status'] === 'sucesso') {
+    echo "<script>alert('Usuário atualizado com sucesso!');</script>";
+}
+
 // Processar atualização do usuário
 if (isset($_POST['salvar_edicao'])) {
     $id_usuario = $_POST['id_usuario'];
@@ -18,7 +23,7 @@ if (isset($_POST['salvar_edicao'])) {
     $stmt->bind_param("ssssi", $nome, $telefone, $email, $tipo_usuario, $id_usuario);
 
     if ($stmt->execute()) {
-        header("Location: adm.php?status=sucesso_edicao");
+        header("Location: editar_usuario.php?id_usuario=$id_usuario&status=sucesso");
         exit();
     } else {
         $mensagem = "Erro ao atualizar: " . $conexao->error;
@@ -79,7 +84,7 @@ if (isset($_GET['id_usuario']) || isset($_POST['id_usuario'])) {
             </select><br><br>
 
             <div class="botoes-acao">
-                <button type="submit" name="salvar_edicao" class="salvar">Salvar Alterações</button>
+                <button href="adm.php" type="submit" name="salvar_edicao" class="salvar">Salvar Alterações</button>
                 <a href="adm.php" class="link-cancelar">Cancelar e Voltar</a>
             </div>
         </form>

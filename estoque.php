@@ -11,6 +11,11 @@ if ($conn->connect_error) {
   die("Erro na conexão: " . $conn->connect_error);
 }
 
+// Se atualizou, exibir alerta de sucesso
+if (isset($_GET['status']) && $_GET['status'] === 'sucesso') {
+  echo "<script>alert('Estoque atualizado com sucesso!');</script>";
+}
+
 // Atualizar dados do livro
 if (isset($_POST['atualizar'])) {
   $id_livro = $_POST['id_livro'];
@@ -23,6 +28,10 @@ if (isset($_POST['atualizar'])) {
   $stmt = $conn->prepare($sql_update);
   $stmt->bind_param("iii", $quantidade_total, $quantidade_disponivel, $id_livro);
   $stmt->execute();
+  $stmt->close();
+
+  header("Location: estoque.php?status=sucesso");
+  exit;
 }
 
 // Pesquisa
@@ -127,7 +136,6 @@ if ($pesquisa != "") {
     </div>
   </div>
 </body>
-
 </html>
 
 <?php
