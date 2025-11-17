@@ -1,4 +1,18 @@
 <?php
+session_start();
+
+// 🔒 BLOQUEIO: só permite usuário logado
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+  header("Location: login.php");
+  exit;
+}
+
+// 🔒 SOMENTE ADMIN
+if ($_SESSION['tipo_usuario'] !== 'admin') {
+  header("Location: index.php"); // expulsar leitor
+  exit;
+}
+
 include 'cabecalho_painel.php';
 
 $host = "localhost";

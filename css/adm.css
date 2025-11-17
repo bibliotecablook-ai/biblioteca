@@ -171,4 +171,64 @@ body {
   }
 
 
+  /* BOTÕES GERAIS */
+button,
+.pesquisa,
+.excluir,
+.editar {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+/* Botão Pesquisar */
+.pesquisa {
+    background: #0066ff;
+    color: white;
+}
+.pesquisa:hover {
+    background: #004cc7;
+}
+
+/* Botão Editar */
+.editar {
+    background: #28a745;
+    color: white;
+}
+.editar:hover {
+    background: #1d7e33;
+}
+
+/* Botão Excluir */
+.excluir {
+    background: #dc3545;
+    color: white;
+}
+.excluir:hover {
+    background: #b72a36;
+}
+
+/* Botão Voltar */
+.botao-voltar {
+    display: inline-block;
+    background: #333;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.botao-voltar:hover {
+    background: #000;
+}
+
+/* Botões dentro da tabela */
+.acoes button {
+    margin-right: 6px;
+}
+
+
   
