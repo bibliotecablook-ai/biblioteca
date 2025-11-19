@@ -52,9 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
             $stmt->execute();
             $stmt->close();
 
-            $_SESSION['mensagem_sucesso'] = "📚 Empréstimo realizado com sucesso!";
+            $_SESSION['mensagem_sucesso'] = "Empréstimo realizado com sucesso!";
         } else {
-            $_SESSION['mensagem_sucesso'] = "❌ Livro indisponível no momento.";
+            $_SESSION['mensagem_sucesso'] = "Livro indisponível no momento.";
         }
 
     } elseif ($acao === 'lido') {
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
         $stmt->execute();
         $stmt->close();
 
-        $_SESSION['mensagem_sucesso'] = "📘 Livro marcado como lido!";
+        $_SESSION['mensagem_sucesso'] = "Livro marcado como lido!";
 
     } elseif ($acao === 'desejado') {
         $stmt = $conexao->prepare("DELETE FROM emprestimos WHERE id_usuario = ? AND id_livro = ?");
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && isset($_PO
         $stmt->execute();
         $stmt->close();
 
-        $_SESSION['mensagem_sucesso'] = "⭐ Livro adicionado aos desejados!";
+        $_SESSION['mensagem_sucesso'] = "Livro adicionado aos desejados!";
     }
 
     header('Location: dashboard.php');
