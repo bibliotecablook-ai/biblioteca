@@ -1,158 +1,365 @@
--- biblioteca.sql completo e autocontido
--- Cria o banco e todas as tabelas com FKs nomeadas e ON DELETE CASCADE onde apropriado
+-- phpMyAdmin SQL Dump
+-- version 5.1.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Tempo de geração: 14-Nov-2025 às 20:57
+-- Versão do servidor: 10.4.22-MariaDB
+-- versão do PHP: 8.1.2
 
-CREATE DATABASE IF NOT EXISTS `biblioteca_blook`
-DEFAULT CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-USE `biblioteca_blook`;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- (Opcional) remover tabelas antigas para evitar conflitos ao importar várias vezes
-DROP TABLE IF EXISTS Reservas;
-DROP TABLE IF EXISTS Emprestimos;
-DROP TABLE IF EXISTS Desejados;
-DROP TABLE IF EXISTS Lidos;
-DROP TABLE IF EXISTS Livros;
-DROP TABLE IF EXISTS Usuarios;
-DROP TABLE IF EXISTS Generos;
-DROP TABLE IF EXISTS Autores;
 
--- ==============================================
--- TABELA: AUTORES
--- ==============================================
-CREATE TABLE Autores (
-    id_autor INT PRIMARY KEY AUTO_INCREMENT,
-    nome_autor VARCHAR(100) NOT NULL,
-    nacionalidade VARCHAR(50),
-    data_nascimento DATE
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Banco de dados: `biblioteca_blook`
+--
+
+CREATE DATABASE biblioteca_blook;
+
+USE biblioteca_blook;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `autores`
+--
+
+CREATE TABLE `autores` (
+  `id_autor` int(11) NOT NULL,
+  `nome_autor` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nacionalidade` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `data_nascimento` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- TABELA: GÊNEROS
--- ==============================================
-CREATE TABLE Generos (
-    id_genero INT PRIMARY KEY AUTO_INCREMENT,
-    nome_genero VARCHAR(50) UNIQUE NOT NULL
+--
+-- Extraindo dados da tabela `autores`
+--
+
+INSERT INTO `autores` (`id_autor`, `nome_autor`, `nacionalidade`, `data_nascimento`) VALUES
+(1, 'Taylor Jenkins Reid', 'Americana', '1983-12-20'),
+(2, 'Colleen Hoover', 'Americana', '1979-12-11'),
+(3, 'Pierre Boulle', NULL, NULL),
+(4, 'Cressida Cowell', NULL, NULL),
+(5, 'E. Lockhart', NULL, NULL),
+(6, 'J.K. Rowling', NULL, NULL),
+(7, 'William Joyce', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `desejados`
+--
+
+CREATE TABLE `desejados` (
+  `id_desejado` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_livro` int(11) NOT NULL,
+  `data_adicao` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- TABELA: USUÁRIOS
--- ==============================================
-CREATE TABLE Usuarios (
-    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    senha VARCHAR(255) NOT NULL,
-    telefone VARCHAR(20),
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    tipo_usuario ENUM('admin', 'leitor') NOT NULL DEFAULT 'leitor'
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `emprestimos`
+--
+
+CREATE TABLE `emprestimos` (
+  `id_emprestimo` int(11) NOT NULL,
+  `id_livro` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `data_emprestimo` date NOT NULL,
+  `data_prevista_devolucao` date NOT NULL,
+  `data_devolucao` date DEFAULT NULL,
+  `status` enum('emprestado','devolvido','atrasado') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'emprestado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- TABELA: LIVROS
--- ==============================================
-CREATE TABLE Livros (
-    id_livro INT PRIMARY KEY AUTO_INCREMENT,
-    titulo VARCHAR(255) NOT NULL,
-    id_autor INT,
-    id_genero INT,
-    ano_publicacao INT,
-    isbn VARCHAR(20) UNIQUE,
-    edicao VARCHAR(50),
-    quantidade_total INT NOT NULL DEFAULT 1,
-    quantidade_disponivel INT NOT NULL DEFAULT 1,
-    capa VARCHAR(255),
-    CONSTRAINT fk_livros_autor FOREIGN KEY (id_autor) REFERENCES Autores(id_autor) ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT fk_livros_genero FOREIGN KEY (id_genero) REFERENCES Generos(id_genero) ON DELETE SET NULL ON UPDATE CASCADE
+--
+-- Extraindo dados da tabela `emprestimos`
+--
+
+INSERT INTO `emprestimos` (`id_emprestimo`, `id_livro`, `id_usuario`, `data_emprestimo`, `data_prevista_devolucao`, `data_devolucao`, `status`) VALUES
+(1, 2, 1, '2025-11-14', '2025-11-29', NULL, 'emprestado');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `generos`
+--
+
+CREATE TABLE `generos` (
+  `id_genero` int(11) NOT NULL,
+  `nome_genero` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- TABELA: LIVROS LIDOS (histórico de leitura)
--- ==============================================
-CREATE TABLE Lidos (
-    id_lido INT PRIMARY KEY AUTO_INCREMENT,
-    id_usuario INT NOT NULL,
-    id_livro INT NOT NULL,
-    data_leitura DATE DEFAULT (CURRENT_DATE),
-    avaliacao TINYINT,
-    comentario TEXT,
-    CONSTRAINT fk_lidos_usuario FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_lidos_livro FOREIGN KEY (id_livro) REFERENCES Livros(id_livro) ON DELETE CASCADE ON UPDATE CASCADE
+--
+-- Extraindo dados da tabela `generos`
+--
+
+INSERT INTO `generos` (`id_genero`, `nome_genero`) VALUES
+(4, 'Fantasia'),
+(6, 'Ficção'),
+(2, 'Ficção Científica'),
+(7, 'Infantil'),
+(3, 'Não-Ficção'),
+(1, 'Romance'),
+(5, 'Suspense');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `lidos`
+--
+
+CREATE TABLE `lidos` (
+  `id_lido` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_livro` int(11) NOT NULL,
+  `data_leitura` date DEFAULT curdate(),
+  `avaliacao` tinyint(4) DEFAULT NULL,
+  `comentario` text COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- TABELA: DESEJADOS (wish-list)
--- ==============================================
-CREATE TABLE Desejados (
-    id_desejado INT PRIMARY KEY AUTO_INCREMENT,
-    id_usuario INT NOT NULL,
-    id_livro INT NOT NULL,
-    data_adicao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_desejados_usuario FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_desejados_livro FOREIGN KEY (id_livro) REFERENCES Livros(id_livro) ON DELETE CASCADE ON UPDATE CASCADE,
-    UNIQUE KEY uk_usuario_livro (id_usuario, id_livro)
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `livros`
+--
+
+CREATE TABLE `livros` (
+  `id_livro` int(11) NOT NULL,
+  `titulo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_autor` int(11) DEFAULT NULL,
+  `id_genero` int(11) DEFAULT NULL,
+  `ano_publicacao` int(11) DEFAULT NULL,
+  `isbn` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edicao` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `quantidade_total` int(11) NOT NULL DEFAULT 1,
+  `quantidade_disponivel` int(11) NOT NULL DEFAULT 1,
+  `capa` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- TABELA: EMPRÉSTIMOS
--- ==============================================
-CREATE TABLE Emprestimos (
-    id_emprestimo INT PRIMARY KEY AUTO_INCREMENT,
-    id_livro INT NOT NULL,
-    id_usuario INT NOT NULL,
-    data_emprestimo DATE NOT NULL,
-    data_prevista_devolucao DATE NOT NULL,
-    data_devolucao DATE,
-    status ENUM('emprestado','devolvido','atrasado') NOT NULL DEFAULT 'emprestado',
-    CONSTRAINT fk_emprestimos_livro FOREIGN KEY (id_livro) REFERENCES Livros(id_livro) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_emprestimos_usuario FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+--
+-- Extraindo dados da tabela `livros`
+--
+
+INSERT INTO `livros` (`id_livro`, `titulo`, `id_autor`, `id_genero`, `ano_publicacao`, `isbn`, `edicao`, `quantidade_total`, `quantidade_disponivel`, `capa`) VALUES
+(1, 'Os Sete Maridos de Evelyn Hugo', 1, 1, 2017, '9788584390978', NULL, 5, 5, 'img/capas/evelyn.jpg'),
+(2, 'Daisy Jones & The Six', 1, 1, 2019, '9788584391623', NULL, 3, 2, 'img/capas/daisy.jpg'),
+(3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', NULL, 10, 10, 'img/capas/acaba.jpg'),
+(4, 'Planeta dos Macacos', 3, 2, 1963, '9788576572138', '', 36, 9, 'img/capas/capa_691775a743bea.jpg'),
+(5, 'Mentirosos', 5, 6, 2014, '9788565765480', '', 13, 5, 'img/capas/capa_691777eb9bf78.jpg'),
+(6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'img/capas/capa_6917788806540.jpg'),
+(7, 'Harry Potter e a Pedra Filosofal', 6, 4, 1997, '9788532511010 ', '', 26, 6, 'img/capas/capa_691783d6a1a52.jpg'),
+(8, 'O Homem da Lua ', 7, 7, 2012, '9788562500428 ', '', 15, 11, 'img/capas/capa_691788a2224db.jpg'),
+(9, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos', 7, 7, 2012, '9788581222912', '', 13, 6, 'img/capas/capa_691789659134f.jpg');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `reservas`
+--
+
+CREATE TABLE `reservas` (
+  `id_reserva` int(11) NOT NULL,
+  `id_livro` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `data_reserva` datetime DEFAULT current_timestamp(),
+  `status` enum('ativa','cancelada','atendida') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ativa'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- TABELA: RESERVAS
--- ==============================================
-CREATE TABLE Reservas (
-    id_reserva INT PRIMARY KEY AUTO_INCREMENT,
-    id_livro INT NOT NULL,
-    id_usuario INT NOT NULL,
-    data_reserva DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('ativa','cancelada','atendida') NOT NULL DEFAULT 'ativa',
-    CONSTRAINT fk_reservas_livro FOREIGN KEY (id_livro) REFERENCES Livros(id_livro) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_reservas_usuario FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
-    UNIQUE KEY uk_reserva (id_livro, id_usuario, status)
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `usuarios`
+--
+
+CREATE TABLE `usuarios` (
+  `id_usuario` int(11) NOT NULL,
+  `nome` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `senha` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `telefone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `data_cadastro` datetime DEFAULT current_timestamp(),
+  `tipo_usuario` enum('admin','leitor') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'leitor'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================
--- DADOS INICIAIS (opcionais)
--- ==============================================
-INSERT IGNORE INTO Generos (nome_genero) VALUES
-('Romance'),
-('Ficção Científica'),
-('Não-Ficção'),
-('Fantasia'),
-('Suspense');
+--
+-- Extraindo dados da tabela `usuarios`
+--
 
-INSERT IGNORE INTO Autores (nome_autor, nacionalidade, data_nascimento) VALUES
-('Taylor Jenkins Reid', 'Americana', '1983-12-20'),
-('Colleen Hoover', 'Americana', '1979-12-11');
+INSERT INTO `usuarios` (`id_usuario`, `nome`, `email`, `senha`, `telefone`, `data_cadastro`, `tipo_usuario`) VALUES
+(1, 'Usuário Padrão', 'usuario@email.com', 'hash_da_senha_do_usuario', NULL, '2025-11-14 15:18:16', 'leitor'),
+(2, 'Admin Blook', 'admin@blook.com', 'hash_da_senha_do_admin', NULL, '2025-11-14 15:18:16', 'admin'),
+(3, 'Ramon', 'ramon.silva1234@gmail.com', '$2y$10$kxM2iA0rA.EySPHmH8CNFujylhs/HkyIqmCXSzGQyZ4iqXiTW9Vku', NULL, '2025-11-14 15:20:25', 'leitor'),
+(4, 'Leo', 'Leo.Teixeira123@gmail.com', '$2y$10$ID0svIh/fxiEeLYwpn5Viu/pUBALnrFb0ahR71RY69dkHIs/7xY/u', NULL, '2025-11-14 15:22:47', 'leitor'),
+(5, 'Murilo', 'Murilo.goncalves@gmail.com', '$2y$10$pWL9Y4Zd012t9jnZ/qOK2.9oO6iOwMRzfABsvudsKx5o1Wulbk486', NULL, '2025-11-14 15:25:57', 'leitor'),
+(6, 'Marcos', 'marcos.G@gmail.com', '$2y$10$Gbq6kKuYAmL0sb0hxMrrzuK1Pz9FWN6Gq0VwDWk7KZkvVEsTq5C5i', NULL, '2025-11-14 15:27:13', 'leitor'),
+(9, 'laura', 'laura@gmail.com', '$2y$10$J..qwgZWYhUyxhwhAB.vRO83fY6vdwNvU2a3P7jVD2hkTbXEmaFzS', NULL, '2025-11-14 15:50:25', 'leitor');
 
-INSERT IGNORE INTO Livros (titulo, id_autor, id_genero, ano_publicacao, isbn, quantidade_total, quantidade_disponivel, capa) VALUES
-('Os Sete Maridos de Evelyn Hugo', 1, 1, 2017, '9788584390978', 5, 5, 'img/capas/evelyn.jpg'),
-('Daisy Jones & The Six', 1, 1, 2019, '9788584391623', 3, 2, 'img/capas/daisy.jpg'),
-('É Assim que Acaba', 2, 1, 2016, '9788501112520', 10, 10, 'img/capas/acaba.jpg');
+--
+-- Índices para tabelas despejadas
+--
 
--- Observação: senha deve ser armazenada como hash; aqui deixamos um placeholder.
--- Recomendo gerar o hash em PHP com password_hash('SENHA', PASSWORD_DEFAULT) e então inserir o hash resultante.
-INSERT IGNORE INTO Usuarios (id_usuario, nome, email, senha, tipo_usuario) VALUES
-(1, 'Usuário Padrão', 'usuario@email.com', 'usersenha', 'leitor'),
-(2, 'Admin Blook', 'admin@blook.com', 'adminsenha', 'admin');
+--
+-- Índices para tabela `autores`
+--
+ALTER TABLE `autores`
+  ADD PRIMARY KEY (`id_autor`);
 
--- Exemplo de empréstimo inicial (usuário 1 e livro 2 devem existir)
-INSERT IGNORE INTO Emprestimos (id_livro, id_usuario, data_emprestimo, data_prevista_devolucao) VALUES
-(2, 1, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 15 DAY));
+--
+-- Índices para tabela `desejados`
+--
+ALTER TABLE `desejados`
+  ADD PRIMARY KEY (`id_desejado`),
+  ADD UNIQUE KEY `id_usuario` (`id_usuario`,`id_livro`),
+  ADD KEY `id_livro` (`id_livro`);
 
--- Exemplo de lidos/desejados (opcionais)
-INSERT IGNORE INTO Lidos (id_usuario, id_livro, data_leitura, avaliacao, comentario) VALUES
-(1, 1, CURDATE(), 5, 'Ótimo livro');
+--
+-- Índices para tabela `emprestimos`
+--
+ALTER TABLE `emprestimos`
+  ADD PRIMARY KEY (`id_emprestimo`),
+  ADD KEY `id_livro` (`id_livro`),
+  ADD KEY `id_usuario` (`id_usuario`);
 
-INSERT IGNORE INTO Desejados (id_usuario, id_livro) VALUES
-(1, 3);
+--
+-- Índices para tabela `generos`
+--
+ALTER TABLE `generos`
+  ADD PRIMARY KEY (`id_genero`),
+  ADD UNIQUE KEY `nome_genero` (`nome_genero`);
+
+--
+-- Índices para tabela `lidos`
+--
+ALTER TABLE `lidos`
+  ADD PRIMARY KEY (`id_lido`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_livro` (`id_livro`);
+
+--
+-- Índices para tabela `livros`
+--
+ALTER TABLE `livros`
+  ADD PRIMARY KEY (`id_livro`),
+  ADD UNIQUE KEY `isbn` (`isbn`),
+  ADD KEY `id_autor` (`id_autor`),
+  ADD KEY `id_genero` (`id_genero`);
+
+--
+-- Índices para tabela `reservas`
+--
+ALTER TABLE `reservas`
+  ADD PRIMARY KEY (`id_reserva`),
+  ADD UNIQUE KEY `id_livro` (`id_livro`,`id_usuario`,`status`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Índices para tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT de tabelas despejadas
+--
+
+--
+-- AUTO_INCREMENT de tabela `autores`
+--
+ALTER TABLE `autores`
+  MODIFY `id_autor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de tabela `desejados`
+--
+ALTER TABLE `desejados`
+  MODIFY `id_desejado` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `emprestimos`
+--
+ALTER TABLE `emprestimos`
+  MODIFY `id_emprestimo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de tabela `generos`
+--
+ALTER TABLE `generos`
+  MODIFY `id_genero` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de tabela `lidos`
+--
+ALTER TABLE `lidos`
+  MODIFY `id_lido` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `livros`
+--
+ALTER TABLE `livros`
+  MODIFY `id_livro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT de tabela `reservas`
+--
+ALTER TABLE `reservas`
+  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- Restrições para despejos de tabelas
+--
+
+--
+-- Limitadores para a tabela `desejados`
+--
+ALTER TABLE `desejados`
+  ADD CONSTRAINT `desejados_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`),
+  ADD CONSTRAINT `desejados_ibfk_2` FOREIGN KEY (`id_livro`) REFERENCES `livros` (`id_livro`);
+
+--
+-- Limitadores para a tabela `emprestimos`
+--
+ALTER TABLE `emprestimos`
+  ADD CONSTRAINT `emprestimos_ibfk_1` FOREIGN KEY (`id_livro`) REFERENCES `livros` (`id_livro`),
+  ADD CONSTRAINT `emprestimos_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
+
+--
+-- Limitadores para a tabela `lidos`
+--
+ALTER TABLE `lidos`
+  ADD CONSTRAINT `lidos_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`),
+  ADD CONSTRAINT `lidos_ibfk_2` FOREIGN KEY (`id_livro`) REFERENCES `livros` (`id_livro`);
+
+--
+-- Limitadores para a tabela `livros`
+--
+ALTER TABLE `livros`
+  ADD CONSTRAINT `livros_ibfk_1` FOREIGN KEY (`id_autor`) REFERENCES `autores` (`id_autor`),
+  ADD CONSTRAINT `livros_ibfk_2` FOREIGN KEY (`id_genero`) REFERENCES `generos` (`id_genero`);
+
+--
+-- Limitadores para a tabela `reservas`
+--
+ALTER TABLE `reservas`
+  ADD CONSTRAINT `reservas_ibfk_1` FOREIGN KEY (`id_livro`) REFERENCES `livros` (`id_livro`),
+  ADD CONSTRAINT `reservas_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
