@@ -1,15 +1,14 @@
 <?php
 session_start();
 
-// 🔒 BLOQUEIO: só permite usuário logado
+
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
   header("Location: login.php");
   exit;
 }
 
-// 🔒 SOMENTE ADMIN
 if ($_SESSION['tipo_usuario'] !== 'admin') {
-  header("Location: index.php"); // expulsar leitor
+  header("Location: index.php"); 
   exit;
 }
 
@@ -25,12 +24,11 @@ if ($conn->connect_error) {
   die("Erro na conexão: " . $conn->connect_error);
 }
 
-// Se atualizou, exibir alerta de sucesso
+
 if (isset($_GET['status']) && $_GET['status'] === 'sucesso') {
   echo "<script>alert('Estoque atualizado com sucesso!');</script>";
 }
 
-// Atualizar dados do livro
 if (isset($_POST['atualizar'])) {
   $id_livro = $_POST['id_livro'];
   $quantidade_total = $_POST['quantidade_total'];
@@ -48,7 +46,7 @@ if (isset($_POST['atualizar'])) {
   exit;
 }
 
-// Pesquisa
+
 $pesquisa = "";
 if (isset($_GET['q'])) {
   $pesquisa = trim($_GET['q']);
@@ -101,50 +99,48 @@ if ($pesquisa != "") {
     </div>
 
     <table>
-      <thead>
+  <thead>
+    <tr>
+      <th>Título</th>
+      <th>Autor</th>
+      <th>Gênero</th>
+      <th>Ano</th>
+      <th>Quantidade Total</th>
+      <th>Disponível</th>
+      <th>Ação</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php if ($result && $result->num_rows > 0): ?>
+      <?php while ($row = $result->fetch_assoc()): ?>
         <tr>
-          <th>Título</th>
-          <th>Autor</th>
-          <th>Gênero</th>
-          <th>Ano</th>
-          <th>Quantidade Total</th>
-          <th>Disponível</th>
-          <th>Ação</th>
+          <form method="POST">
+            <td><?= htmlspecialchars($row['titulo']) ?></td>
+            <td><?= htmlspecialchars($row['nome_autor']) ?></td>
+            <td><?= htmlspecialchars($row['nome_genero']) ?></td>
+            <td><?= htmlspecialchars($row['ano_publicacao']) ?></td>
+            <td><?= htmlspecialchars($row['quantidade_total']) ?></td>
+            <td><?= htmlspecialchars($row['quantidade_disponivel']) ?></td>
+            <td>
+              <a href="editar_estoque.php?id=<?= $row['id_livro'] ?>" class="editar">Editar</a>
+            </td>
+          </form>
         </tr>
-      </thead>
-      <tbody>
-        <?php if ($result && $result->num_rows > 0): ?>
-          <?php while ($row = $result->fetch_assoc()): ?>
-            <tr>
-              <form method="POST">
-                <td><?= htmlspecialchars($row['titulo']) ?></td>
-                <td><?= htmlspecialchars($row['nome_autor']) ?></td>
-                <td><?= htmlspecialchars($row['nome_genero']) ?></td>
-                <td><?= htmlspecialchars($row['ano_publicacao']) ?></td>
-                <td><input type="number" name="quantidade_total" value="<?= $row['quantidade_total'] ?>" min="0" required>
-                </td>
-                <td><input type="number" name="quantidade_disponivel" value="<?= $row['quantidade_disponivel'] ?>" min="0"
-                    required></td>
-                <td>
-                  <input type="hidden" name="id_livro" value="<?= $row['id_livro'] ?>">
-                  <button type="submit" name="atualizar" class="editar">Salvar</button>
-                </td>
-              </form>
-            </tr>
-          <?php endwhile; ?>
-        <?php else: ?>
-          <tr>
-            <td colspan="8">Nenhum livro encontrado.</td>
-          </tr>
-        <?php endif; ?>
-      </tbody>
-    </table>
+      <?php endwhile; ?>
+    <?php else: ?>
+      <tr>
+        <td colspan="7">Nenhum livro encontrado.</td>
+      </tr>
+    <?php endif; ?>
+  </tbody>
+</table>
+
 
     <div class="acoes-estoque">
       <a href="adicionar_livro.php" class="botao-adicionar">+ Adicionar Novo Livro</a>
     </div>
 
-    <!-- Botão de navegação -->
+  
     <div class="botao-navegacao">
       <a href="adm.php" class="botao-voltar">Ir para Painel de Usuários</a>
     </div>

@@ -50,7 +50,7 @@ alert('<?php echo $_SESSION['mensagem_sucesso']; ?>');
     <div class="tm-page-col-right tm-tab-contents">
       <div id="first-tab-group" class="tabgroup">
 
-        <!-- ================= EMPRÉSTIMOS ================= -->
+      
         <div id="tab1">
           <h3 class="tm-text-secondary tm-mb-5">Empréstimos</h3>
           <table class="table table-striped table-bordered">
@@ -94,7 +94,7 @@ alert('<?php echo $_SESSION['mensagem_sucesso']; ?>');
           </table>
         </div>
 
-        <!-- ================= LIDOS ================= -->
+        
         <div id="tab2">
           <h3 class="tm-text-secondary tm-mb-5">Lidos</h3>
           <table class="table table-striped table-bordered">
@@ -136,7 +136,7 @@ alert('<?php echo $_SESSION['mensagem_sucesso']; ?>');
           </table>
         </div>
 
-        <!-- ================= DESEJADOS ================= -->
+      
         <div id="tab3">
           <h3 class="tm-text-secondary tm-mb-5">Desejados</h3>
           <table class="table table-striped table-bordered">

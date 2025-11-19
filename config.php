@@ -192,8 +192,8 @@ include 'cabecalho_painel.php';
             <?php if (!empty($livro['capa'])): ?>
               <img src="<?php echo htmlspecialchars($livro['capa']); ?>" class="card-img-top" alt="Capa do livro">
             <?php else: ?>
-              <img src="imagens/capa_padrao.jpg" class="card-img-top" alt="Capa padrão">
-            <?php endif; ?>
+              <img src="<?= htmlspecialchars($livro['capa']) ?>" class="card-img-top">
+              <?php endif; ?>
 
             <div class="card-body">
               <h5 class="card-title text-center"><?php echo htmlspecialchars($livro['titulo']); ?></h5>
