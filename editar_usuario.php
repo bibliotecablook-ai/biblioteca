@@ -71,9 +71,6 @@ if (isset($_GET['id_usuario']) || isset($_POST['id_usuario'])) {
             <label for="nome">Nome Completo:</label>
             <input type="text" id="nome" name="nome" value="<?= htmlspecialchars($usuario['nome']) ?>" required><br><br>
 
-            <label for="telefone">Telefone:</label>
-            <input type="text" id="telefone" name="telefone" value="<?= htmlspecialchars($usuario['telefone']) ?>"><br><br>
-
             <label for="email">E-mail:</label>
             <input type="email" id="email" name="email" value="<?= htmlspecialchars($usuario['email']) ?>" required><br><br>
 

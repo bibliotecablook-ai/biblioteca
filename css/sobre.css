@@ -1,0 +1,25 @@
+.tm-tab-links {
+    position: sticky;
+    top: 100px; /* ajusta conforme seu cabeçalho */
+    align-self: flex-start;
+    top: 20px;
+
+}
+
+/* Área onde o quadrado fica */
+.tm-tab-icon {
+    width: 20px;
+    height: 20px;
+    background-color: transparent; /* fica transparente quando não ativo */
+    display: inline-block;
+    margin-right: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Quando estiver ativo */
+.tabs a.active .tm-tab-icon {
+    background-color: #628e90; /* mesma cor do quadradinho da imagem */
+}
+
+

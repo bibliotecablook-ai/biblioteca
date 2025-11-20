@@ -218,9 +218,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>Nova Capa:</label>
         <input type="file" name="capa" accept="image/*">
 
-        <p>Capa atual:</p>
-        <img src="/<?= $livro['capa'] ?>" width="150" style="border:1px solid #ccc;">
-
         <button type="submit">Salvar Alterações</button>
     </form>
 

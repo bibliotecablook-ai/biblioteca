@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Verifica se o e-mail já existe usando prepared statement
-    $stmt = $conexao->prepare("SELECT * FROM Usuarios WHERE email = ?");
+    $stmt = $conexao->prepare("SELECT * FROM usuarios WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();

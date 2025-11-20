@@ -84,47 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Adicionar Livro</title>
-  <link rel="stylesheet" href="css/estoque.css">
-  <style>
-    .form-container {
-      max-width: 700px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
-    }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007bff;
-      color: #fff;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    small {
-      color: #555;
-      display: block;
-      margin-bottom: 10px;
-    }
-  </style>
-</head>
-<body>
   <div class="form-container">
     <h2>Adicionar Novo Livro</h2>
     <form method="POST" enctype="multipart/form-data">

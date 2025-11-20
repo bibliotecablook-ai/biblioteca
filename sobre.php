@@ -33,13 +33,13 @@
                 </a>
               </li>
               <li>
-                <a href="#tab2" class="">
+                <a href="#tab2">
                   <div class="tm-tab-icon"></div>
                   Visão
                 </a>
               </li>
               <li>
-                <a href="#tab3" class="">
+                <a href="#tab3">
                   <div class="tm-tab-icon"></div>
                   Importância 
                 </a>
@@ -89,15 +89,140 @@
                     Além de entreter, a literatura preserva memórias, histórias e tradições, permitindo que gerações compartilhem conhecimento e valores. Ler é, portanto, uma forma de aprendizado, reflexão e enriquecimento pessoal, transformando cada página em uma experiência única e significativa.
                   </p>
                 </div>
-
-             
+              </div>
         
         </div>
       </section>
 
-      <!-- Call to Action -->
-      
-      <!-- Page footer -->
+
+<!-- SCRIPT QUE TROCA A ABA ATIVA -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const links = document.querySelectorAll(".tabs a");
+    const tabs = document.querySelectorAll(".tabgroup > div");
+
+    links.forEach(link => {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            // remove active de todos
+            links.forEach(l => l.classList.remove("active"));
+
+            // adiciona active ao clicado
+            this.classList.add("active");
+
+            // troca conteúdo exibido
+            const target = this.getAttribute("href");
+            tabs.forEach(tab => {
+                tab.style.display = (tab.id === target.substring(1)) ? "block" : "none";
+            });
+        });
+    });
+
+    // inicia mostrando apenas o primeiro conteúdo
+    tabs.forEach((tab, index) => {
+        tab.style.display = index === 0 ? "block" : "none";
+    });
+});
+</script>
+
+
+<div class="tm-page-col-right">
+  <h3 class="tm-text-secondary tm-mb-5">Integrantes</h3>
+        <div class="row tm-pt-7 tm-pb-6">
+          <div class="col-md-6 tm-home-section-2-left">
+            
+            <div
+              class="img-fluid tm-mb-4 tm-small-parallax"
+              data-parallax="scroll"
+              data-image-src="img/laura.jpg">
+            </div>
+            <div>
+              <h3 class="tm-text-secondary tm-mb-4">
+                Laura Romano
+              </h3>
+
+              <a href="https://github.com/lauraaromano" target="_blank">
+          <img src="img/github.png" width="40px" alt="GitHub">
+        </a>
+              
+            </div>
+          </div>
+          <div class="col-md-6 tm-home-section-2-right">
+            <div
+              class="img-fluid tm-mb-4 tm-small-parallax"
+              data-parallax="scroll"
+              data-image-src="img/leo.jpeg"></div>
+            <div>
+              <h3 class="tm-text-secondary tm-mb-4">
+                Leonardo Teixeira da Silva
+              </h3>
+
+                    <a href="https://github.com/LeoTeiSil" target="_blank">
+          <img src="img/github.png" width="40px" alt="GitHub">
+        </a>
+            
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="row tm-pt-7 tm-pb-6">
+          <div class="col-md-6 tm-home-section-2-left">
+            
+            <div
+              class="img-fluid tm-mb-4 tm-small-parallax"
+              data-parallax="scroll"
+              data-image-src="img/profile.jpg">
+            </div>
+            <div>
+              <h3 class="tm-text-secondary tm-mb-4">
+                Marcos Gabriel
+              </h3>
+                                  <a href="https://github.com/Marcos021108" target="_blank">
+          <img src="img/github.png" width="40px" alt="GitHub">
+        </a>
+            </div>
+          </div>
+          <div class="col-md-6 tm-home-section-2-right">
+            <div
+              class="img-fluid tm-mb-4 tm-small-parallax"
+              data-parallax="scroll"
+              data-image-src="img/murilo.jpeg"></div>
+            <div>
+              <h3 class="tm-text-secondary tm-mb-4">
+                Murilo Gonçalves da Silva
+              </h3>
+                                <a href="https://github.com/murilo1006" target="_blank">
+          <img src="img/github.png" width="40px" alt="GitHub">
+        </a>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="row tm-pt-7 tm-pb-6">
+          <div class="col-md-6 tm-home-section-2-left">
+            
+            <div
+              class="img-fluid tm-mb-4 tm-small-parallax"
+              data-parallax="scroll"
+              data-image-src="img/profile.jpg">
+            </div>
+            <div>
+              <h3 class="tm-text-secondary tm-mb-4">
+                Ramon
+              </h3>
+                                  <a href="https://github.com/Ramon150908" target="_blank">
+          <img src="img/github.png" width="40px" alt="GitHub">
+        </a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
 <?php
   include 'footer.php'
 ?>

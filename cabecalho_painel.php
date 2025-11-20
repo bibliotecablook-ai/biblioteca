@@ -17,7 +17,8 @@ https://templatemo.com/tm-532-next-level
     <link rel="stylesheet" href="login.css">
     <link rel="stylesheet" href="css/adm.css">
     <link rel="stylesheet" href="css/editar_usuario.css">
-    
+    <link rel="stylesheet" href="css/editar_estoque.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 
   </head>
   <body>

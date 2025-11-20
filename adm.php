@@ -11,7 +11,8 @@ if ($_SESSION['tipo_usuario'] !== 'admin') {
     header("Location: index.php"); 
     exit;
 }
-// adm.php - Painel do Administrador (versão com DELEÇÃO COMPLETA)
+
+// adm.php - Painel do Administrador
 
 include 'cabecalho_painel.php';
 
@@ -69,13 +70,8 @@ if (isset($_POST['excluir'])) {
 
         /* ----- APAGAR RELAÇÕES QUE BLOQUEIAM A EXCLUSÃO ----- */
 
-        // Apagar livros lidos
         $conn->query("DELETE FROM lidos WHERE id_usuario = $id_usuario");
-
-        // Apagar empréstimos
         $conn->query("DELETE FROM emprestimos WHERE id_usuario = $id_usuario");
-
-        // Apagar reservas
         $conn->query("DELETE FROM reservas WHERE id_usuario = $id_usuario");
 
         /* ----- AGORA SIM apaga o usuário ----- */
@@ -98,17 +94,19 @@ if (isset($_POST['excluir'])) {
 $pesquisa = isset($_GET['q']) ? trim($_GET['q']) : '';
 
 if ($pesquisa !== '') {
-    $sql = "SELECT id_usuario, nome, email, telefone FROM Usuarios 
+    $sql = "SELECT id_usuario, nome, email 
+            FROM Usuarios 
             WHERE tipo_usuario = 'leitor'
-            AND (nome LIKE ? OR email LIKE ? OR telefone LIKE ?)
+            AND (nome LIKE ? OR email LIKE ?)
             ORDER BY nome ASC";
     $stmt = $conn->prepare($sql);
     $like = "%{$pesquisa}%";
-    $stmt->bind_param("sss", $like, $like, $like);
+    $stmt->bind_param("ss", $like, $like);
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $result = $conn->query("SELECT id_usuario, nome, email, telefone FROM Usuarios 
+    $result = $conn->query("SELECT id_usuario, nome, email 
+                            FROM Usuarios 
                             WHERE tipo_usuario = 'leitor' 
                             ORDER BY nome ASC");
 }
@@ -140,7 +138,7 @@ if ($pesquisa !== '') {
     <table>
         <thead>
         <tr>
-            <th>Nome</th><th>E-mail</th><th>Telefone</th><th>Ações</th>
+            <th>Nome</th><th>E-mail</th><th>Ações</th>
         </tr>
         </thead>
         <tbody>
@@ -149,7 +147,6 @@ if ($pesquisa !== '') {
                 <tr>
                     <td><?= htmlspecialchars($row['nome']) ?></td>
                     <td><?= htmlspecialchars($row['email']) ?></td>
-                    <td><?= htmlspecialchars($row['telefone']) ?></td>
                     <td>
                         <a href="editar_usuario.php?id_usuario=<?= $row['id_usuario'] ?>">
                             <button class="editar">Editar</button>
@@ -164,7 +161,7 @@ if ($pesquisa !== '') {
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="4">Nenhum usuário encontrado.</td></tr>
+            <tr><td colspan="3">Nenhum usuário encontrado.</td></tr>
         <?php endif; ?>
         </tbody>
     </table>

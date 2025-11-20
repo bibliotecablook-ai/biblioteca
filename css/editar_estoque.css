@@ -1,0 +1,118 @@
+/* ---- ESTILO GERAL ---- */
+body {
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+/* ---- CONTAINER DO FORM ---- */
+.form-container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: #d7e2e77e;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.form-container h2 {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 30px;
+    margin-bottom: 25px;
+}
+
+/* ---- LABELS ---- */
+.form-container label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* ---- INPUTS ---- */
+.form-container input[type="text"],
+.form-container input[type="number"],
+.form-container input[type="file"],
+.form-container select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    background: #fff;
+    transition: border-color 0.3s;
+}
+
+.form-container input:focus,
+.form-container select:focus {
+    border-color: #989966;
+    outline: none;
+}
+
+/* ---- CAMPOS OPCIONAIS (autor novo/gênero novo) ---- */
+.form-container small {
+    display: block;
+    font-size: 13px;
+    margin-top: 5px;
+    color: #444;
+}
+
+/* ---- IMAGEM DA CAPA ---- */
+.form-container img {
+    margin-top: 10px;
+    border-radius: 6px;
+}
+
+/* ---- BOTÃO DE SALVAR ---- */
+.form-container button[type="submit"] {
+    background: #76c2c2;
+    color: black;
+    padding: 12px 22px;
+    margin-top: 25px;
+    border: none;
+    border-radius: 6px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.form-container button[type="submit"]:hover {
+    background: #72b1b1;
+}
+
+/* ---- LINK VOLTAR ---- */
+.form-container a {
+    display: inline-block;
+    margin-top: 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.form-container a:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
+.editar {
+    background: #76c2c2;
+    color: black;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* NOVO HOVER */
+.editar:hover {
+    background: #5aa3a3; /* cor mais escura */
+    color: white;        /* letra branca ao passar o mouse */
+}
+
+
+
+
