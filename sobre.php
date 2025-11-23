@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             <div>
               <h3 class="tm-text-secondary tm-mb-4">
-                Marcos Gabriel
+                Marcos Gabriel da Silva Basso
               </h3>
                                   <a href="https://github.com/Marcos021108" target="_blank">
           <img src="img/github.png" width="40px" alt="GitHub">
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             <div>
               <h3 class="tm-text-secondary tm-mb-4">
-                Ramon
+                Ramon Alves Silva
               </h3>
                                   <a href="https://github.com/Ramon150908" target="_blank">
           <img src="img/github.png" width="40px" alt="GitHub">
