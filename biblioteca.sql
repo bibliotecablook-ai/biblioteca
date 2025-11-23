@@ -11,13 +11,12 @@ CREATE DATABASE IF NOT EXISTS `biblioteca_blook` DEFAULT CHARACTER SET utf8mb4 C
 USE `biblioteca_blook`;
 
 DROP TABLE IF EXISTS `autores`;
-CREATE TABLE IF NOT EXISTS `autores` (
-  `id_autor` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `autores` (
+  `id_autor` int(11) NOT NULL,
   `nome_autor` varchar(100) NOT NULL,
   `nacionalidade` varchar(50) DEFAULT NULL,
-  `data_nascimento` date DEFAULT NULL,
-  PRIMARY KEY (`id_autor`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `data_nascimento` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `autores` (`id_autor`, `nome_autor`, `nacionalidade`, `data_nascimento`) VALUES
 (1, 'Taylor Jenkins Reid', 'Americana', '1983-12-20'),
@@ -29,40 +28,32 @@ INSERT INTO `autores` (`id_autor`, `nome_autor`, `nacionalidade`, `data_nascimen
 (7, 'William Joyce', NULL, NULL);
 
 DROP TABLE IF EXISTS `desejados`;
-CREATE TABLE IF NOT EXISTS `desejados` (
-  `id_desejado` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `desejados` (
+  `id_desejado` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `id_livro` int(11) NOT NULL,
-  `data_adicao` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`id_desejado`),
-  UNIQUE KEY `id_usuario` (`id_usuario`,`id_livro`),
-  KEY `id_livro` (`id_livro`)
+  `data_adicao` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `emprestimos`;
-CREATE TABLE IF NOT EXISTS `emprestimos` (
-  `id_emprestimo` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `emprestimos` (
+  `id_emprestimo` int(11) NOT NULL,
   `id_livro` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `data_emprestimo` date NOT NULL,
   `data_prevista_devolucao` date NOT NULL,
   `data_devolucao` date DEFAULT NULL,
-  `status` enum('emprestado','devolvido','atrasado') NOT NULL DEFAULT 'emprestado',
-  PRIMARY KEY (`id_emprestimo`),
-  KEY `id_livro` (`id_livro`),
-  KEY `id_usuario` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `status` enum('emprestado','devolvido','atrasado') NOT NULL DEFAULT 'emprestado'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `emprestimos` (`id_emprestimo`, `id_livro`, `id_usuario`, `data_emprestimo`, `data_prevista_devolucao`, `data_devolucao`, `status`) VALUES
 (1, 2, 1, '2025-11-14', '2025-11-29', NULL, 'emprestado');
 
 DROP TABLE IF EXISTS `generos`;
-CREATE TABLE IF NOT EXISTS `generos` (
-  `id_genero` int(11) NOT NULL AUTO_INCREMENT,
-  `nome_genero` varchar(50) NOT NULL,
-  PRIMARY KEY (`id_genero`),
-  UNIQUE KEY `nome_genero` (`nome_genero`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `generos` (
+  `id_genero` int(11) NOT NULL,
+  `nome_genero` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `generos` (`id_genero`, `nome_genero`) VALUES
 (4, 'Fantasia'),
@@ -74,21 +65,18 @@ INSERT INTO `generos` (`id_genero`, `nome_genero`) VALUES
 (5, 'Suspense');
 
 DROP TABLE IF EXISTS `lidos`;
-CREATE TABLE IF NOT EXISTS `lidos` (
-  `id_lido` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `lidos` (
+  `id_lido` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `id_livro` int(11) NOT NULL,
   `data_leitura` date DEFAULT curdate(),
   `avaliacao` tinyint(4) DEFAULT NULL,
-  `comentario` text DEFAULT NULL,
-  PRIMARY KEY (`id_lido`),
-  KEY `id_usuario` (`id_usuario`),
-  KEY `id_livro` (`id_livro`)
+  `comentario` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `livros`;
-CREATE TABLE IF NOT EXISTS `livros` (
-  `id_livro` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `livros` (
+  `id_livro` int(11) NOT NULL,
   `titulo` varchar(255) NOT NULL,
   `id_autor` int(11) DEFAULT NULL,
   `id_genero` int(11) DEFAULT NULL,
@@ -97,48 +85,39 @@ CREATE TABLE IF NOT EXISTS `livros` (
   `edicao` varchar(50) DEFAULT NULL,
   `quantidade_total` int(11) NOT NULL DEFAULT 1,
   `quantidade_disponivel` int(11) NOT NULL DEFAULT 1,
-  `capa` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id_livro`),
-  UNIQUE KEY `isbn` (`isbn`),
-  KEY `id_autor` (`id_autor`),
-  KEY `id_genero` (`id_genero`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `capa` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `livros` (`id_livro`, `titulo`, `id_autor`, `id_genero`, `ano_publicacao`, `isbn`, `edicao`, `quantidade_total`, `quantidade_disponivel`, `capa`) VALUES
-(1, 'Os Sete Maridos de Evelyn Hugo', 1, 1, 2017, '9788584390978', NULL, 5, 5, 'img/capas/evelyn.jpg'),
-(2, 'Daisy Jones & The Six', 1, 1, 2019, '9788584391623', NULL, 3, 2, 'img/capas/daisy.jpg'),
-(3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', '0', 10, 10, 'img/capas/capa_69234635882c0.jpg'),
-(4, 'Planeta dos Macacos', 3, 2, 1963, '9788576572138', '0', 36, 9, 'img/capas/capa_69234644a8df8.jpg'),
-(5, 'Mentirosos', 5, 6, 2014, '9788565765480', '0', 13, 5, 'img/capas/capa_692346536ff7c.jpg'),
-(6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'img/capas/capa_6917788806540.jpg'),
-(7, 'Harry Potter e a Pedra Filosofal', 6, 4, 1997, '9788532511010', '', 26, 6, 'img/capas/capa_691783d6a1a52.jpg'),
-(8, 'O Homem da Lua', 7, 7, 2012, '9788562500428', '', 15, 11, 'img/capas/capa_691788a2224db.jpg'),
-(9, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos', 7, 7, 2012, '9788581222912', '', 13, 6, 'img/capas/capa_691789659134f.jpg');
+(1, 'Os Sete Maridos de Evelyn Hugo', 1, 1, 2017, '9788584390978', '', 5, 5, 'capa_69234b6325f45.jpeg'),
+(2, 'Daisy Jones & The Six', 1, 1, 2019, '9788584391623', '', 3, 2, 'capa_69234b5b0bb91.jpeg'),
+(3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', '0', 10, 10, 'capa_69234af9aa2c5.jpeg'),
+(4, 'Planeta dos Macacos', 3, 2, 1963, '9788576572138', '0', 36, 9, 'capa_69234b127473e.jpeg'),
+(5, 'Mentirosos', 5, 6, 2014, '9788565765480', '0', 13, 5, 'capa_69234be9e95a8.jpeg'),
+(6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'capa_69234c3310b1e.webp'),
+(7, 'Harry Potter e a Pedra Filosofal', 6, 4, 1997, '9788532511010', '', 26, 6, 'capa_69234c3bec314.jpg'),
+(8, 'O Homem da Lua', 7, 7, 2012, '9788562500428', '', 15, 11, 'capa_69234c10172fb.jpg'),
+(9, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos', 7, 7, 2012, '9788581222912', '', 13, 6, 'capa_69234c1a20552.jpeg');
 
 DROP TABLE IF EXISTS `reservas`;
-CREATE TABLE IF NOT EXISTS `reservas` (
-  `id_reserva` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `reservas` (
+  `id_reserva` int(11) NOT NULL,
   `id_livro` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `data_reserva` datetime DEFAULT current_timestamp(),
-  `status` enum('ativa','cancelada','atendida') NOT NULL DEFAULT 'ativa',
-  PRIMARY KEY (`id_reserva`),
-  UNIQUE KEY `id_livro` (`id_livro`,`id_usuario`,`status`),
-  KEY `id_usuario` (`id_usuario`)
+  `status` enum('ativa','cancelada','atendida') NOT NULL DEFAULT 'ativa'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `usuarios`;
-CREATE TABLE IF NOT EXISTS `usuarios` (
-  `id_usuario` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `usuarios` (
+  `id_usuario` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `senha` varchar(255) NOT NULL,
   `telefone` varchar(20) DEFAULT NULL,
   `data_cadastro` datetime DEFAULT current_timestamp(),
-  `tipo_usuario` enum('admin','leitor') NOT NULL DEFAULT 'leitor',
-  PRIMARY KEY (`id_usuario`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `tipo_usuario` enum('admin','leitor') NOT NULL DEFAULT 'leitor'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `usuarios` (`id_usuario`, `nome`, `email`, `senha`, `telefone`, `data_cadastro`, `tipo_usuario`) VALUES
 (1, 'Usuário Padrão', 'usuario@email.com', 'hash_da_senha_do_usuario', NULL, '2025-11-14 15:18:16', 'leitor'),
@@ -148,6 +127,69 @@ INSERT INTO `usuarios` (`id_usuario`, `nome`, `email`, `senha`, `telefone`, `dat
 (13, 'Marcos', 'marcos.G@gmail.com', '$2y$10$t.7qsDKLnZmVHBAJWHoQH./..6DrXpq/osaEFgRV0vWW21NcBL0zG', NULL, '2025-11-23 14:08:59', 'leitor'),
 (14, 'Ramon', 'ramon.silva1234@gmail.com', '$2y$10$tOnbLw44qR4UyeE5PgPKdu9khiLRmQPGchnRRnhgij/iq2jtGF6YS', NULL, '2025-11-23 14:09:29', 'leitor'),
 (15, 'Admin Blook', 'admin@blook.com', '$2y$10$PxtS2/cEesH2EdpovmnNyeujvgBd.iIyKxqUsHER3qMsqyYWxkasG', NULL, '2025-11-23 14:22:17', 'admin');
+
+
+ALTER TABLE `autores`
+  ADD PRIMARY KEY (`id_autor`);
+
+ALTER TABLE `desejados`
+  ADD PRIMARY KEY (`id_desejado`),
+  ADD UNIQUE KEY `id_usuario` (`id_usuario`,`id_livro`),
+  ADD KEY `id_livro` (`id_livro`);
+
+ALTER TABLE `emprestimos`
+  ADD PRIMARY KEY (`id_emprestimo`),
+  ADD KEY `id_livro` (`id_livro`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+ALTER TABLE `generos`
+  ADD PRIMARY KEY (`id_genero`),
+  ADD UNIQUE KEY `nome_genero` (`nome_genero`);
+
+ALTER TABLE `lidos`
+  ADD PRIMARY KEY (`id_lido`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_livro` (`id_livro`);
+
+ALTER TABLE `livros`
+  ADD PRIMARY KEY (`id_livro`),
+  ADD UNIQUE KEY `isbn` (`isbn`),
+  ADD KEY `id_autor` (`id_autor`),
+  ADD KEY `id_genero` (`id_genero`);
+
+ALTER TABLE `reservas`
+  ADD PRIMARY KEY (`id_reserva`),
+  ADD UNIQUE KEY `id_livro` (`id_livro`,`id_usuario`,`status`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `email` (`email`);
+
+
+ALTER TABLE `autores`
+  MODIFY `id_autor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+ALTER TABLE `desejados`
+  MODIFY `id_desejado` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `emprestimos`
+  MODIFY `id_emprestimo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+ALTER TABLE `generos`
+  MODIFY `id_genero` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+ALTER TABLE `lidos`
+  MODIFY `id_lido` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `livros`
+  MODIFY `id_livro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+ALTER TABLE `reservas`
+  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `usuarios`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 
 ALTER TABLE `desejados`
