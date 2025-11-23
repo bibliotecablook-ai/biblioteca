@@ -2,13 +2,13 @@
 session_start();
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-  header("Location: login.php");
-  exit;
+    header("Location: login.php");
+    exit;
 }
 
 if ($_SESSION['tipo_usuario'] !== 'admin') {
-  header("Location: index.php");
-  exit;
+    header("Location: index.php");
+    exit;
 }
 
 include 'cabecalho_painel.php';
@@ -32,7 +32,7 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$id_livro = (int)$_GET['id'];
+$id_livro = (int) $_GET['id'];
 
 $stmt = $conn->prepare("
     SELECT * FROM livros 
@@ -116,12 +116,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['capa']) && $_FILES['capa']['error'] === UPLOAD_ERR_OK) {
 
         $ext = strtolower(pathinfo($_FILES['capa']['name'], PATHINFO_EXTENSION));
-        $permitidos = ['jpg','jpeg','png','webp'];
+        $permitidos = ['jpg', 'jpeg', 'png', 'webp'];
 
         if (in_array($ext, $permitidos)) {
 
             $novo_nome = uniqid('capa_') . '.' . $ext;
-            $dir_rel = "img/capas/";
             $dir_fisico = __DIR__ . "/img/capas/";
 
             if (!is_dir($dir_fisico)) {
@@ -129,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (move_uploaded_file($_FILES['capa']['tmp_name'], $dir_fisico . $novo_nome)) {
-                $capa = $dir_rel . $novo_nome;
+                $capa = $novo_nome; // agora salva só o nome do arquivo
             }
 
         } else {
@@ -145,9 +144,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
-        "siisiisssi",
-        $titulo, $id_autor, $id_genero, $ano, $isbn, $edicao,
-        $quant_total, $quant_disp, $capa, $id_livro
+        "siiississi",
+        $titulo,
+        $id_autor,
+        $id_genero,
+        $ano,
+        $isbn,
+        $edicao,
+        $quant_total,
+        $quant_disp,
+        $capa,
+        $id_livro
     );
 
     $stmt->execute();
@@ -161,70 +168,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<title>Editar Livro</title>
-<link rel="stylesheet" href="css/estoque.css">
+    <meta charset="UTF-8">
+    <title>Editar Livro</title>
+    <link rel="stylesheet" href="css/estoque.css">
 </head>
 
 <body>
-<div class="form-container">
-    <h2>Editar Livro</h2>
+    <div class="form-container">
+        <h2>Editar Livro</h2>
 
-    <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
 
-        <label>Título:</label>
-        <input type="text" name="titulo" value="<?= htmlspecialchars($livro['titulo']) ?>" required>
+            <label>Título:</label>
+            <input type="text" name="titulo" value="<?= htmlspecialchars($livro['titulo']) ?>" required>
 
-        <label>Autor:</label>
-        <select name="id_autor">
-            <?php while($a = $autores->fetch_assoc()): ?>
-                <option value="<?= $a['id_autor'] ?>"
-                    <?= $a['id_autor']==$livro['id_autor'] ? "selected":"" ?>>
-                    <?= htmlspecialchars($a['nome_autor']) ?>
-                </option>
-            <?php endwhile; ?>
-        </select>
-        <small>Ou um novo autor:</small>
-        <input type="text" name="novo_autor" placeholder="Novo autor (opcional)">
+            <label>Autor:</label>
+            <select name="id_autor">
+                <?php while ($a = $autores->fetch_assoc()): ?>
+                    <option value="<?= $a['id_autor'] ?>" <?= $a['id_autor'] == $livro['id_autor'] ? "selected" : "" ?>>
+                        <?= htmlspecialchars($a['nome_autor']) ?>
+                    </option>
+                <?php endwhile; ?>
+            </select>
+            <small>Ou um novo autor:</small>
+            <input type="text" name="novo_autor" placeholder="Novo autor (opcional)">
 
-        <label>Gênero:</label>
-        <select name="id_genero">
-            <?php while($g = $generos->fetch_assoc()): ?>
-                <option value="<?= $g['id_genero'] ?>"
-                    <?= $g['id_genero']==$livro['id_genero'] ? "selected":"" ?>>
-                    <?= htmlspecialchars($g['nome_genero']) ?>
-                </option>
-            <?php endwhile; ?>
-        </select>
-        <small>Ou um novo gênero:</small>
-        <input type="text" name="novo_genero" placeholder="Novo gênero (opcional)">
+            <label>Gênero:</label>
+            <select name="id_genero">
+                <?php while ($g = $generos->fetch_assoc()): ?>
+                    <option value="<?= $g['id_genero'] ?>" <?= $g['id_genero'] == $livro['id_genero'] ? "selected" : "" ?>>
+                        <?= htmlspecialchars($g['nome_genero']) ?>
+                    </option>
+                <?php endwhile; ?>
+            </select>
+            <small>Ou um novo gênero:</small>
+            <input type="text" name="novo_genero" placeholder="Novo gênero (opcional)">
 
-        <label>Ano de Publicação:</label>
-        <input type="number" name="ano_publicacao" value="<?= $livro['ano_publicacao'] ?>">
+            <label>Ano de Publicação:</label>
+            <input type="number" name="ano_publicacao" value="<?= $livro['ano_publicacao'] ?>">
 
-        <label>ISBN:</label>
-        <input type="text" name="isbn" value="<?= $livro['isbn'] ?>">
+            <label>ISBN:</label>
+            <input type="text" name="isbn" value="<?= $livro['isbn'] ?>">
 
-        <label>Edição:</label>
-        <input type="text" name="edicao" value="<?= $livro['edicao'] ?>">
+            <label>Edição:</label>
+            <input type="text" name="edicao" value="<?= $livro['edicao'] ?>">
 
-        <label>Quantidade Total:</label>
-        <input type="number" name="quantidade_total" value="<?= $livro['quantidade_total'] ?>">
+            <label>Quantidade Total:</label>
+            <input type="number" name="quantidade_total" value="<?= $livro['quantidade_total'] ?>">
 
-        <label>Quantidade Disponível:</label>
-        <input type="number" name="quantidade_disponivel" value="<?= $livro['quantidade_disponivel'] ?>">
+            <label>Quantidade Disponível:</label>
+            <input type="number" name="quantidade_disponivel" value="<?= $livro['quantidade_disponivel'] ?>">
 
-        <label>Nova Capa:</label>
-        <input type="file" name="capa" accept="image/*">
+            <label>Nova Capa:</label>
+            <input type="file" name="capa" accept="image/*">
 
-        <button type="submit">Salvar Alterações</button>
-    </form>
+            <button type="submit">Salvar Alterações</button>
+        </form>
 
-    <br>
-    <a href="estoque.php">← Voltar</a>
-</div>
+        <br>
+        <a href="estoque.php">← Voltar</a>
+    </div>
 </body>
+
 </html>
 
 <?php $conn->close(); ?>
