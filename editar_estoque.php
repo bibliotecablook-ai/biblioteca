@@ -1,12 +1,13 @@
 <?php
 session_start();
 
-// 🔐 Segurança
+// Verifica se o usuário está logado; se não estiver, redireciona
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: login.php");
     exit;
 }
 
+// Impede acesso caso o usuário não seja administrador
 if ($_SESSION['tipo_usuario'] !== 'admin') {
     header("Location: index.php");
     exit;
@@ -14,13 +15,13 @@ if ($_SESSION['tipo_usuario'] !== 'admin') {
 
 include 'cabecalho_painel.php';
 
-// ✅ Conexão
+// Conecta ao banco de dados
 $conn = new mysqli("localhost", "root", "", "biblioteca_blook");
 if ($conn->connect_error) {
     die("Erro de conexão: " . $conn->connect_error);
 }
 
-// ✅ Verifica ID
+// Valida o ID do livro informado na URL
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     echo "<script>alert('ID inválido.'); window.location='estoque.php';</script>";
     exit;
@@ -28,25 +29,27 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $id_livro = intval($_GET['id']);
 
-// ✅ Busca do livro
+// Busca os dados do livro no banco
 $stmt = $conn->prepare("SELECT * FROM livros WHERE id_livro = ?");
 $stmt->bind_param("i", $id_livro);
 $stmt->execute();
 $livro = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+// Se o livro não existir, retorna ao estoque
 if (!$livro) {
     echo "<script>alert('Livro não encontrado.'); window.location='estoque.php';</script>";
     exit;
 }
 
-// ✅ Busca autores e gêneros
+// Carrega a lista de autores e gêneros para os selects
 $autores = $conn->query("SELECT id_autor, nome_autor FROM autores ORDER BY nome_autor ASC");
 $generos = $conn->query("SELECT id_genero, nome_genero FROM generos ORDER BY nome_genero ASC");
 
-// ✅ Atualização
+// Quando o formulário for enviado, inicia o processo de atualização
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // Captura e trata os dados enviados
     $titulo = trim($_POST['titulo']);
     $ano = intval($_POST['ano_publicacao']);
     $isbn = trim($_POST['isbn']);
@@ -54,12 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quant_total = intval($_POST['quantidade_total']);
     $quant_disp = intval($_POST['quantidade_disponivel']);
 
-    // ✅ Validação estoque
+    // Impede que a quantidade disponível seja maior que o total
     if ($quant_disp > $quant_total) {
         echo "<script>alert('Disponível não pode ser maior que o total.');</script>";
     } else {
 
-        // ✅ Autor
+        // Caso o usuário cadastre um novo autor, ele é salvo e usado na atualização
         if (!empty($_POST['novo_autor'])) {
             $novo_autor = trim($_POST['novo_autor']);
             $stmt = $conn->prepare("INSERT INTO autores (nome_autor) VALUES (?)");
@@ -70,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_autor = intval($_POST['id_autor']);
         }
 
-        // ✅ Gênero
+        // Mesmo processo caso cadastre um novo gênero
         if (!empty($_POST['novo_genero'])) {
             $novo_genero = trim($_POST['novo_genero']);
             $stmt = $conn->prepare("INSERT INTO generos (nome_genero) VALUES (?)");
@@ -81,9 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_genero = intval($_POST['id_genero']);
         }
 
-        // ✅ Upload de capa
+        // Mantém a capa atual, a menos que o usuário envie uma nova
         $capa = $livro['capa'];
 
+        // Se uma nova imagem foi enviada, valida extensão e salva a nova capa
         if (!empty($_FILES['capa']['name']) && $_FILES['capa']['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES['capa']['name'], PATHINFO_EXTENSION));
             $permitidos = ['jpg', 'jpeg', 'png', 'webp'];
@@ -95,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // ✅ Atualiza banco
+        // Atualiza o livro no banco de dados
         $stmt = $conn->prepare("
             UPDATE livros SET titulo=?, id_autor=?, id_genero=?, ano_publicacao=?, isbn=?, 
             edicao=?, quantidade_total=?, quantidade_disponivel=?, capa=? WHERE id_livro=?
@@ -110,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
+        // Confirma atualização e retorna ao estoque
         echo "<script>alert('Livro atualizado com sucesso!'); window.location='estoque.php';</script>";
         exit;
     }
@@ -128,6 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="form-container">
   <h2>Editar Livro</h2>
 
+  <!-- Formulário para edição dos dados -->
   <form method="POST" enctype="multipart/form-data">
 
     <label>Título:</label>

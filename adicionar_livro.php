@@ -10,11 +10,11 @@ if ($conn->connect_error) {
     die("Erro de conexão: " . $conn->connect_error);
 }
 
-// Busca autores e gêneros existentes
+// Busca a lista de autores e gêneros já cadastrados para mostrar no formulário
 $autores = $conn->query("SELECT id_autor, nome_autor FROM autores ORDER BY nome_autor");
 $generos = $conn->query("SELECT id_genero, nome_genero FROM generos ORDER BY nome_genero");
 
-// Se o formulário foi enviado
+// Verifica se o formulário foi enviado pelo método POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titulo = $_POST['titulo'];
     $ano = $_POST['ano_publicacao'];
@@ -23,28 +23,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quant_total = $_POST['quantidade_total'];
     $quant_disp = $_POST['quantidade_disponivel'];
 
-    // ===== AUTOR =====
+    // Tratamento do autor: usa um existente ou cria um novo se informado
     if (!empty($_POST['novo_autor'])) {
         $novo_autor = trim($_POST['novo_autor']);
-        // Verifica se já existe
         $check = $conn->prepare("SELECT id_autor FROM autores WHERE nome_autor = ?");
         $check->bind_param("s", $novo_autor);
         $check->execute();
         $res = $check->get_result();
 
+        // Caso o autor já exista, apenas pega o ID
         if ($res->num_rows > 0) {
             $id_autor = $res->fetch_assoc()['id_autor'];
         } else {
+            // Se não existe, insere o novo autor na tabela
             $stmt = $conn->prepare("INSERT INTO autores (nome_autor) VALUES (?)");
             $stmt->bind_param("s", $novo_autor);
             $stmt->execute();
             $id_autor = $conn->insert_id;
         }
     } else {
+        // Quando o usuário escolhe um autor já existente
         $id_autor = $_POST['id_autor'];
     }
 
-    // ===== GÊNERO =====
+    // Tratamento parecido para o gênero do livro
     if (!empty($_POST['novo_genero'])) {
         $novo_genero = trim($_POST['novo_genero']);
         $check = $conn->prepare("SELECT id_genero FROM generos WHERE nome_genero = ?");
@@ -64,28 +66,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id_genero = $_POST['id_genero'];
     }
 
-    // ===== Upload da capa =====
+    // Faz o upload da imagem da capa, caso o usuário tenha enviado
     $caminho_capa = null;
     if (isset($_FILES['capa']) && $_FILES['capa']['error'] === UPLOAD_ERR_OK) {
         $extensao = pathinfo($_FILES['capa']['name'], PATHINFO_EXTENSION);
         $nome_arquivo = uniqid('capa_') . '.' . $extensao;
         $diretorio = 'img/capas/';
+
+        // Cria o diretório caso não exista
         if (!is_dir($diretorio)) mkdir($diretorio, 0777, true);
+
+        // Move o arquivo enviado para o local definitivo
         move_uploaded_file($_FILES['capa']['tmp_name'], $diretorio . $nome_arquivo);
         $caminho_capa = $diretorio . $nome_arquivo;
     }
 
-    // ===== Inserção do livro =====
+    // Insere o livro completo no banco com autor, gênero, dados e capa
     $stmt = $conn->prepare("INSERT INTO livros (titulo, id_autor, id_genero, ano_publicacao, isbn, edicao, quantidade_total, quantidade_disponivel, capa) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("siiississ", $titulo, $id_autor, $id_genero, $ano, $isbn, $edicao, $quant_total, $quant_disp, $caminho_capa);
     $stmt->execute();
 
+    // Exibe alerta e volta para a página do estoque
     echo "<script>alert('Livro adicionado com sucesso!'); window.location='estoque.php';</script>";
 }
 ?>
 
-  <div class="form-container">
+<div class="form-container">
     <h2>Adicionar Novo Livro</h2>
+
+    <!-- Formulário para cadastro do livro -->
     <form method="POST" enctype="multipart/form-data">
       <label>Título:</label>
       <input type="text" name="titulo" required>
@@ -97,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <option value="<?= $a['id_autor'] ?>"><?= htmlspecialchars($a['nome_autor']) ?></option>
         <?php endwhile; ?>
       </select>
+
       <small>Ou digite um novo autor abaixo:</small>
       <input type="text" name="novo_autor" placeholder="Novo autor (opcional)">
 
@@ -107,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <option value="<?= $g['id_genero'] ?>"><?= htmlspecialchars($g['nome_genero']) ?></option>
         <?php endwhile; ?>
       </select>
+
       <small>Ou digite um novo gênero abaixo:</small>
       <input type="text" name="novo_genero" placeholder="Novo gênero (opcional)">
 
@@ -130,8 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <button type="submit">Salvar Livro</button>
     </form>
+
     <br>
     <a href="estoque.php">← Voltar para o Estoque</a>
-  </div>
+</div>
 </body>
 </html>
