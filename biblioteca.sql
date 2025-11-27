@@ -104,7 +104,7 @@ CREATE TABLE `livros` (
 INSERT INTO `livros` (`id_livro`, `titulo`, `id_autor`, `id_genero`, `ano_publicacao`, `isbn`, `edicao`, `quantidade_total`, `quantidade_disponivel`, `capa`) VALUES
 (1, 'Os Sete Maridos de Evelyn Hugo', 1, 1, 2017, '9788584390978', '', 5, 5, '7maridos.jpg'),
 (2, 'Daisy Jones & The Six', 1, 1, 2019, '9788584391623', '', 3, 2, 'daisyjones.jpg'),
-(3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', '0', 10, 10, 'assimqueacaba.jpg'),
+(3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', '0', 10, 10, 'capa_69279d6454431.jpg'),
 (4, 'Planeta dos Macacos', 3, 2, 1963, '9788576572138', '0', 36, 9, 'planetadosmacacos.jpg'),
 (5, 'Mentirosos', 5, 6, 2014, '9788565765480', '0', 13, 5, 'mentirosos.jpg'),
 (6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'comotreinarseudragão.jpg'),
