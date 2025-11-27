@@ -102,15 +102,16 @@ CREATE TABLE `livros` (
 
 -- Livros cadastrados inicialmente
 INSERT INTO `livros` (`id_livro`, `titulo`, `id_autor`, `id_genero`, `ano_publicacao`, `isbn`, `edicao`, `quantidade_total`, `quantidade_disponivel`, `capa`) VALUES
-(1, 'Os Sete Maridos de Evelyn Hugo', 1, 1, 2017, '9788584390978', '', 5, 5, 'capa_69235866e5823.jpeg'),
-(2, 'Daisy Jones & The Six', 1, 1, 2019, '9788584391623', '', 3, 2, 'capa_69235819536a2.jpeg'),
-(3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', '0', 10, 10, 'capa_69235826c682b.jpeg'),
-(4, 'Planeta dos Macacos', 3, 2, 1963, '9788576572138', '0', 36, 9, 'capa_692358723b014.jpeg'),
-(5, 'Mentirosos', 5, 6, 2014, '9788565765480', '0', 13, 5, 'capa_692358485a5d1.jpeg'),
-(6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'capa_692358049fe7a.webp'),
+(1, 'Os Sete Maridos de Evelyn Hugo', 1, 1, 2017, '9788584390978', '', 5, 5, '7maridos.jpg'),
+(2, 'Daisy Jones & The Six', 1, 1, 2019, '9788584391623', '', 3, 2, 'daisyjones.jpg'),
+(3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', '0', 10, 10, 'assimqueacaba.jpg'),
+(4, 'Planeta dos Macacos', 3, 2, 1963, '9788576572138', '0', 36, 9, 'planetadosmacacos.jpg'),
+(5, 'Mentirosos', 5, 6, 2014, '9788565765480', '0', 13, 5, 'mentirosos.jpg'),
+(6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'comotreinarseudragão.jpg'),
 (7, 'Harry Potter e a Pedra Filosofal', 6, 4, 1997, '9788532511010', '', 26, 6, 'capa_6923582f233a5.jpg'),
 (8, 'O Homem da Lua', 7, 7, 2012, '9788562500428', '', 15, 11, 'capa_6923585bd75bb.jpg'),
-(9, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos', 7, 7, 2012, '9788581222912', '', 13, 6, 'capa_692358526bbcc.jpeg');
+(9, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos', 7, 7, 2012, '9788581222912', '', 13, 6, 'nicolausaonorte.jpg');
+
 
 -- Tabela de reservas de livros
 DROP TABLE IF EXISTS `reservas`;
