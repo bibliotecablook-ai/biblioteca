@@ -107,10 +107,10 @@ INSERT INTO `livros` (`id_livro`, `titulo`, `id_autor`, `id_genero`, `ano_public
 (3, 'É Assim que Acaba', 2, 1, 2016, '9788501112520', '0', 10, 10, 'capa_69279d6454431.jpg'),
 (4, 'Planeta dos Macacos', 3, 2, 1963, '9788576572138', '0', 36, 9, 'planetadosmacacos.jpg'),
 (5, 'Mentirosos', 5, 6, 2014, '9788565765480', '0', 13, 5, 'mentirosos.jpg'),
-(6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'comotreinarseudragão.jpg'),
+(6, 'Como Treinar o Seu Dragão', 4, 4, 2003, '9788598078717', '', 10, 2, 'Como Treinar o Seu Dragão.jpg'),
 (7, 'Harry Potter e a Pedra Filosofal', 6, 4, 1997, '9788532511010', '', 26, 6, 'capa_6923582f233a5.jpg'),
 (8, 'O Homem da Lua', 7, 7, 2012, '9788562500428', '', 15, 11, 'capa_6923585bd75bb.jpg'),
-(9, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos', 7, 7, 2012, '9788581222912', '', 13, 6, 'nicolausaonorte.jpg');
+(9, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos', 7, 7, 2012, '9788581222912', '', 13, 6, 'Nicolau São Norte e a Batalha Contra o Rei dos Pesadelos.jpg');
 
 
 -- Tabela de reservas de livros
